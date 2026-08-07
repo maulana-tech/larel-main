@@ -1,12 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 
-// "Mist" palette — LaxStell theme, light + dark.
-// Warm, desaturated neutrals (the fog) + a single gold accent (the backlit sun
-// through fog). Every shade resolves through a CSS variable (an `R G B` triplet)
-// so a `.dark` / light class on <html> re-themes the whole app with no per-class
-// edits, while Tailwind opacity modifiers (`/50`, `/15`) keep working via the
-// `<alpha-value>` placeholder. Concrete values live in src/index.css (:root = light,
-// .dark = dark). `ink`/`spectral` alias `mist`/`halo`; `zinc` is the warm text ramp.
+// "Mist" palette — black-and-white theme, light + dark.
+// A single neutral ramp (R = G = B throughout): broken white surfaces against
+// near-black ink, with no gold, brass or sepia cast anywhere. Every shade
+// resolves through a CSS variable (an `R G B` triplet) so a `.dark` / light class
+// on <html> re-themes the whole app with no per-class edits, while Tailwind
+// opacity modifiers (`/50`, `/15`) keep working via the `<alpha-value>`
+// placeholder. Concrete values live in src/index.css (:root = light, .dark =
+// dark). `ink`/`spectral` alias `mist`/`halo`; `zinc` is the neutral text ramp.
 const v = (name) => `rgb(var(${name}) / <alpha-value>)`
 
 const mist = {
@@ -33,18 +34,18 @@ const halo = {
   deep: v('--halo-deep'),
 }
 
-// Warm antique-gold accent for positive/confirmed states — the sepia-world
-// stand-in for the old emerald "success" green. Olive-brass so it reads warm
-// and stays clearly apart from the brighter `amber` used for warnings.
+// Neutral accent for positive/confirmed states — the black-and-white stand-in
+// for the old emerald "success" green. Reads as a plain grey step so it stays
+// clearly apart from the `amber` still used for warnings.
 const patina = {
   300: v('--patina-300'),
   400: v('--patina-400'),
   500: v('--patina-500'),
 }
 
-// Warm the default grey text scale so existing `text-zinc-*` reads warm (fog),
-// not cool. Deep-merges with Tailwind's zinc, overriding the shades in use.
-const warmZinc = {
+// Re-point the default grey text scale at the themed neutral ramp so existing
+// `text-zinc-*` follows light/dark. Deep-merges with Tailwind's zinc.
+const themedZinc = {
   50: v('--zinc-50'),
   100: v('--zinc-100'),
   200: v('--zinc-200'),
@@ -66,10 +67,10 @@ export default {
       colors: {
         mist,
         halo,
-        ink: mist, // alias — existing bg-ink-*/border-ink-* now read warm.
-        spectral: halo, // alias — existing text-spectral/bg-spectral now read gold.
+        ink: mist, // alias — existing bg-ink-*/border-ink-* follow the neutral ramp.
+        spectral: halo, // alias — existing text-spectral/bg-spectral read as the foreground ink.
         patina,
-        zinc: warmZinc,
+        zinc: themedZinc,
       },
       fontFamily: {
         display: ['Montserrat', 'ui-sans-serif', 'system-ui', 'sans-serif'],
@@ -97,7 +98,7 @@ export default {
         // Tight and quiet — no colored glow, no wide diffuse "ghost card" shadow.
         glow: '0 1px 2px 0 rgba(0,0,0,0.35)',
         panel: '0 1px 2px 0 rgba(0,0,0,0.35)',
-        hair: '0 0 0 1px rgba(59,56,45,0.9)',
+        hair: '0 0 0 1px rgba(56,56,56,0.9)',
       },
       keyframes: {
         'fade-in': {
@@ -109,7 +110,7 @@ export default {
           '70%': { transform: 'scale(1.6)', opacity: '0' },
           '100%': { opacity: '0' },
         },
-        // Slow drift for the fog haze.
+        // Slow drift for the background haze.
         drift: {
           '0%, 100%': { transform: 'translate3d(0,0,0)' },
           '50%': { transform: 'translate3d(-1.5%, -2%, 0)' },
