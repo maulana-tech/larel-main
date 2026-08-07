@@ -2,7 +2,7 @@
   "name": "larel",
   "version": "0.1.0",
   "private": true,
-  "description": "Full-privacy platform on Stellar — bridge, portfolio, private pay, ZK dark pool.",
+  "description": "Full-privacy platform on Flare — shielded FXRP, portfolio, private pay, ZK dark pool.",
   "license": "MIT",
   "packageManager": "pnpm@10.11.0",
   "scripts": {
@@ -14,7 +14,6 @@
     "push-wuzz": "^1.0.3"
   },
   "devDependencies": {
-    "@stellar/stellar-sdk": "^14.6.1",
     "tsx": "^4.23.1"
   }
 }
