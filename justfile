@@ -15,7 +15,7 @@ default:
 install:
     pnpm install
 
-# Build the TypeScript SDK — the frontend & relayer import @lax-stell/sdk from dist/.
+# Build the TypeScript SDK — the frontend imports @larel/sdk from dist/.
 sdk:
     pnpm --filter @larel/sdk build
 
@@ -40,12 +40,8 @@ typecheck:
 build:
     pnpm --filter frontend build
 
-# --- relayer (optional — needed for the cross-chain bridge_in loop) ---------
-
-# Build + run the relayer CLI, reading env from your shell. e.g. `just relayer watch`.
-relayer *ARGS:
-    pnpm --filter @larel/relayer build >/dev/null && node bridge/relayer/dist/index.js {{ARGS}}
-
-# Run the relayer test suite.
-relayer-test:
-    pnpm --filter @larel/relayer test
+# --- flare / evm contracts -------------------------------------------------
+# The Soroban workspace and the Ethereum light-client relayer were removed in the
+# migration to Flare: the Flare Data Connector (FdcHub → FdcVerification) does the
+# cross-chain attestation natively, so there is nothing to relay. EVM contract
+# recipes land here once contracts-evm/ exists — see plan-migrate.md.
