@@ -1,42 +1,41 @@
-# CONTEXT.md — Flare Summer Signal · Bounty 1: Interoperable Asset Products
+# CONTEXT.md — Flare Summer Signal · Bounty 2: Confidential Compute Apps
 
 ## 1. Track Overview
 
-Build products that make assets more useful across Flare and connected ecosystems. Focus is on applications, integrations, and user experiences that help users **move, access, manage, or use assets through Flare**.
+Build private applications using **Flare Confidential Compute (FCC)**. Focus is on applications that use **Trusted Execution Environments (TEEs)** to run sensitive logic offchain while connecting the result back to onchain workflows.
 
-**Priority assets:** XRP / FXRP and FAssets in general. Strong products involving other connected ecosystems or assets are also eligible.
+Goal: explore products where privacy, secure execution, or verifiable offchain computation creates a better user or developer experience.
 
 **Eligible product directions:**
-- FXRP onboarding flows
-- Cross-chain asset dashboards
-- Wallet experiences
-- Payment or merchant flows
-- DeFi integrations
-- Asset movement UX
-- Portfolio tools
-- Liquidity interfaces
-- Products that make interoperable assets easier to use in real applications
+- Confidential orderbooks
+- Private auctions / sealed-bid markets
+- Secure matching engines
+- Private strategy execution
+- TEE-secured agents
+- Confidential AI workflows
+- Private scoring or ranking systems
+- Applications where sensitive inputs must stay private, but output still needs to be usable by smart contracts / onchain systems
 
-**What judges want to see:** a working product or integration, a clear user problem, meaningful use of Flare infrastructure, and a practical path beyond the hackathon.
+**What judges want to see:** an explanation of what runs privately inside the TEE, what is verified or consumed onchain, what trust assumptions exist, and why the product benefits from confidential compute rather than normal smart contract execution.
 
 ---
 
 ## 2. Submission Requirements (this track)
 
 - [ ] Project name
-- [ ] Bounty selected: Bounty 1 — Interoperable Asset Products
+- [ ] Bounty selected: Bounty 2 — Confidential Compute Apps
 - [ ] Short product description
 - [ ] Target user
 - [ ] Demo link / video / working app link
 - [ ] GitHub repo or technical materials
-- [ ] Explanation of how the project uses Flare
+- [ ] Explanation of how the project uses Flare (specifically FCC/TEE integration)
 - [ ] Explanation of what was newly built / ported / integrated / improved during the program
 - [ ] Smart contract addresses or deployment details (if applicable)
 - [ ] Short roadmap / next steps
 
 Encouraged extras: deployment network (Coston2 / Songbird / Flare Mainnet), user acquisition/testing/feedback progress, early traction signals (pilot users, community interest, partner conversations).
 
-If bringing an existing project, clearly separate: what existed before, what's newly built during the hackathon, what's ported/integrated/improved on Flare, and why the new work matters.
+If bringing an existing project (e.g. porting existing TEE work to Flare), clearly separate: what existed before, what's newly built during the hackathon, what's ported/integrated/improved on Flare specifically, and why the new work matters for users/devs/ecosystem.
 
 ---
 
@@ -45,25 +44,29 @@ If bringing an existing project, clearly separate: what existed before, what's n
 | Criterion | Question |
 |---|---|
 | Product usefulness | Does it solve a real user/developer/ecosystem/infra problem? |
-| Flare integration quality | Is Flare (esp. FAssets/FXRP) used meaningfully, or superficially? |
-| Technical execution | Does the demo work? Is the architecture credible? |
+| Flare integration quality | Is FCC/TEE used meaningfully — genuinely needed for privacy/verifiability — or superficial? |
+| Technical execution | Does the demo work? Is the TEE architecture credible and understandable? |
 | Evidence of new work | Is it clear what was newly built/ported/integrated/improved? |
-| Clarity & future potential | Clear explanation of product/user/integration/next steps? Credible path beyond hackathon? |
+| Clarity & future potential | Can the team clearly explain the private computation, trust model, onchain consumption, and next steps? |
 
 ---
 
 ## 4. Core Concepts to Understand
 
-- **Flare** — EVM-compatible L1 built to unlock DeFi for assets without native smart contracts (e.g., XRP), via enshrined protocols: FTSO (price feeds), FDC (data connector / attestations), FAssets, and Flare Confidential Compute.
-- **FAssets** — protocol that wraps assets from chains without native smart contract support (XRP, DOGE, BTC) into Flare-native, fully-backed tokens (FXRP, FBTC, FDOGE) usable in DeFi.
-- **FXRP** — the FAssets wrapped representation of XRP on Flare. Backed 1:1 by locked XRP + agent collateral. <cite index="10-1">FXRP is minted after a user sends an XRP transaction on the XRP Ledger, which the Flare Data Connector proves occurred, after which a corresponding FXRP amount is minted and delivered on Flare.</cite>
-- **Minting flow (standard)** — <cite index="11-1">reserve collateral from a suitable agent, send the underlying XRP to the agent, use the Flare Data Connector (FDC) to generate proof of payment, then call `executeMinting` on the AssetManager contract to convert the attested XRP payment into FXRP.</cite>
-- **Direct minting flow (alternative)** — <cite index="16-1">a single XRPL payment to the FXRP Core Vault with a memo encoding the Flare-side recipient, with no collateral reservation or agent selection step; an executor then finalizes the mint on Flare via `executeDirectMinting`.</cite>
-- **Redemption** — FXRP can be burned to reclaim underlying XRP; processed via agents or, for KYC'd users, via the Core Vault.
-- **Agents** — <cite index="13-1">entities that hold underlying assets and provide collateral for minting/redemption, using a hot "work address" for operations and a cold "management address" for administrative actions, and must maintain a backing factor of locked collateral.</cite>
-- **Core Vault (CV)** — <cite index="17-1">a component that lets KYC-approved users burn FXRP and receive underlying XRP directly, typically processed once per day with lower priority than agent-based redemption requests.</cite> <cite index="13-1">It also frees up agent collateral and reduces reliance on individual agents for redemption supply.</cite>
-- **Lots** — <cite index="18-1">minting and redemption must occur in positive integer multiples of a fixed "lot size," which prevents underlying-chain transaction fees from exceeding minting/redemption fees and limits gas-costly micro-redemptions; redemption tickets are processed FIFO against agents.</cite>
-- **Collateral types** — <cite index="14-1">FAssets collateral is locked in smart contracts to guarantee FAssets can always be redeemed or compensated, using Flare's native FLR token and/or governance-approved ERC-20 tokens as Vault Collateral and Pool Collateral.</cite>
+- **Flare Confidential Compute (FCC)** — <cite index="5-1">confidential extensions running inside a Trusted Execution Environment (GCP Confidential Space / AMD SEV), wired to Flare contracts, currently one of Flare's core protocol pillars alongside FTSO and FDC.</cite> Positioned by Flare as <cite index="7-1">upcoming verifiable compute with TEEs, unlocking cross-chain execution.</cite>
+- **On-chain building blocks:**
+  - <cite index="5-1">TeeExtensionRegistry and TeeMachineRegistry — on-chain registries for TEE extensions and machines.</cite>
+  - <cite index="5-1">The InstructionSender contract pattern — the only address allowed to submit instructions to the TEE extension.</cite>
+  - <cite index="5-1">A routing model using OPType/OPCommand bytes32 pairs, matched consistently across Solidity contracts, Go configuration, and the Go router.</cite>
+- **Extension code structure:** <cite index="5-1">a POST /action handler following a 4-step pattern, a TEE signing port, and a types server exposing a /decode endpoint.</cite>
+- **Attestation & trust model:** <cite index="5-1">code-hash whitelisting, a distinction between MODE=0 (real attested execution) and simulated mode, reproducible builds via SOURCE_DATE_EPOCH, and a defined deploy lifecycle across Coston/Coston2 testnets.</cite>
+- **Underlying TEE technology (general background):** <cite index="1-1">Google Cloud Confidential Space is a secure enclave built on Trusted Execution Environments that provides hardware-enforced confidentiality while generating cryptographic attestations, which can then be verified on-chain to prove computations executed correctly without external interference.</cite> <cite index="1-1">Prior Flare TEE hackathon projects ran on Confidential Space instances using AMD SEV with vTPM attestation as cryptographic proof of an isolated, tamper-proof execution environment.</cite>
+- **Why FDC/FTSO matter here too:** <cite index="1-1">Flare's enshrined data protocols (FTSO and FDC) are positioned as uniquely suited to ensure data provenance and integrity verification for AI/TEE outputs consumed on-chain</cite> — relevant if your app needs to prove the freshness/correctness of data fed into the TEE, or attest the TEE's output back on-chain.
+- **Design questions to answer for the submission:**
+  1. What sensitive input/logic runs inside the TEE (and why can't it run in a public smart contract)?
+  2. What attestation proves the TEE executed the expected code untampered?
+  3. What minimal output is surfaced on-chain, and how do smart contracts consume/verify it?
+  4. What are the residual trust assumptions (hardware vendor, cloud provider, code publisher)?
 
 ---
 
@@ -72,53 +75,34 @@ If bringing an existing project, clearly separate: what existed before, what's n
 ### Getting started
 - Flare Developer Hub (main docs): https://dev.flare.network/
 - Network overview (Mainnet, Coston2 testnet, Songbird, Coston): https://dev.flare.network/network/overview
-- Any doc page is available as agent-ready Markdown by appending `.md` to the URL (e.g. `https://dev.flare.network/fassets/overview.md`)
+- Any doc page available as agent-ready Markdown by appending `.md` to the URL
 - Full machine-readable docs index: `llms.txt` at dev.flare.network
-- Flare AI Skills (Claude Code / Cursor / agent skill packs covering FTSO, FAssets, FXRP, FDC): https://github.com/flare-foundation/flare-ai-skills
+- Flare AI Skills repo (agent skill packs covering FCC — TEE extensions, TeeExtensionRegistry/TeeMachineRegistry, InstructionSender, OPType/OPCommand routing, attestation, reproducible builds): https://github.com/flare-foundation/flare-ai-skills
 
-### FAssets / FXRP — core docs
-- FAssets overview: https://dev.flare.network/fassets/overview
-- FXRP overview: https://dev.flare.network/fxrp/overview
-- Minting overview (mechanics, lots, redemption queue): https://dev.flare.network/fassets/minting
-- Mint FAssets (standard flow, step-by-step guide): https://dev.flare.network/fassets/developer-guides/fassets-mint
-- Direct Mint FXRP (single-payment flow): https://dev.flare.network/fassets/developer-guides/fassets-direct-minting
-- Collateral (Vault/Pool collateral mechanics): https://dev.flare.network/fassets/collateral
-- Core Vault (KYC'd redemption path): https://dev.flare.network/fassets/core-vault
-- Operational Parameters (minting caps, lot sizes, redemption fees per network): https://dev.flare.network/fassets/operational-parameters
-- FAssets product page (adoption stats, use cases): https://flare.network/products/fassets
+### FCC / TEE — reference repos
+- **fce-extension-scaffold** — "Hello World" starter scaffold for building a Flare Confidential Compute extension
+- **fce-sign** — reference example demonstrating TEE-based signing
+- Flare Foundation GitHub org (all official repos, starters, periphery packages): https://github.com/flare-foundation
 
-### Data & infrastructure protocols relevant to asset products
-- Flare Data Connector (FDC) — used to verify external-chain payments/events (needed for minting proofs, cross-chain attestations)
-- Flare Time Series Oracle (FTSO) — decentralized price feeds, useful for portfolio/dashboard valuation, DeFi pricing logic
+### Background reading on TEE + verifiable compute on Flare
+- Flare x Google Cloud Confidential Space hackathon writeup (context on how TEE attestations get verified on Flare, and prior project patterns like DeFAI, verifiable AI): https://flare.network/news/flare-hackathon-winners
+- Flare AI Kit — framework bridging Confidential Space TEE + AI + Flare blockchain for verifiable AI applications (relevant if building confidential AI/agent workflows)
 
-### Tooling / starter kits
-- flare-hardhat-starter (Hardhat/TypeScript template + periphery examples): https://github.com/flare-foundation
-- flare-foundry-starter (Foundry template): https://github.com/flare-foundation
-- flare-viem-starter — referenced in direct minting guide as containing a complete runnable minting example
-- FAssets demo dApp (reference implementation, source + deployed instance) — linked from FAssets overview docs
+### Data protocols to pair with FCC
+- Flare Data Connector (FDC) — for attesting external data/events feeding into or validating TEE computation
+- Flare Time Series Oracle (FTSO) — for price/data feeds if the private computation involves market data (e.g. confidential orderbooks, private strategy execution)
+
+### General TEE / confidential computing background (non-Flare-specific, useful for architecture design)
+- AMD SEV-SNP and Intel TDX — the two dominant hardware-based confidential VM technologies; useful vocabulary when explaining trust assumptions in a submission
+- Concepts worth referencing in submissions: hardware root of trust, remote attestation, encrypted memory isolation from host/hypervisor
 
 ### Testnet resources
-- Coston2 Faucet — get testnet C2FLR and test FXRP directly (no minting required, fastest way to start)
-- XRP Testnet Faucet — for testnet XRP on XRPL when testing the full mint flow
-
-### Ecosystem integrations to be aware of
-- SparkDEX (Uniswap V3 fork) — swap USDT0/FLR/other ERC-20s to FXRP
-- Firelight — ERC-4626 compliant yield vaults for FXRP
-- Upshift — strategy-driven yield vaults supporting FXRP
-- Flare Smart Accounts — lets wallets/custodians/exchanges integrate FXRP-powered products into existing interfaces without users manually bridging
+- Coston2 — recommended testnet for dApp development and FCC extension deployment/testing per the attestation lifecycle described in Flare AI Skills docs
 
 ### Community / support
 - Flare Hackathon Telegram: https://t.me/+5Vn6ZKhr6KI3NjIx
 
 ---
 
-## 6. Notes / Fit Assessment
-
-Areas of overlap with prior project experience worth reusing:
-- DeFi/payment-flow design experience from AgentPay SEA (x402 micropayments, USDC settlement on Morph L2) is transferable to designing FXRP payment/merchant flows.
-- Prior work on cross-chain identity/settlement (Thia-Term's `did:t3n` on HashKey Chain) gives relevant background for cross-chain asset UX design, even though the underlying stack differs from FAssets.
-- Open question: which product direction fits best — a merchant/payment flow using FXRP, a portfolio/dashboard tool, or a DeFi integration (lending/liquidity) built on top of an existing FXRP vault (Firelight/Upshift)?
-
----
 
 *This file is a working reference for internal planning — not an official hackathon document.*
