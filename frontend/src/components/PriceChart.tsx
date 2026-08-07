@@ -57,7 +57,7 @@ export function PriceChart({ pair, price }: { pair: string; price?: number | nul
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
-    const up     = isDark ? '#d6c57c' : '#b08a2e'
+    const up     = isDark ? '#e0e0e0' : '#3a3a3a'
     const down   = isDark ? '#fca5a5' : '#dc2626'
     const text   = isDark ? '#888888' : '#666666'
     const grid   = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'
