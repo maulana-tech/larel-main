@@ -90,14 +90,14 @@ function Label({ children, className = '' }: { children: ReactNode; className?: 
 
 export function StoryShielded({ onEnter }: { onEnter: () => void }) {
   const dark = useIsDark()
-  const cardBg = { background: dark ? 'rgba(239,233,220,0.04)' : 'rgba(33,27,18,0.03)' }
+  const cardBg = { background: dark ? 'rgba(242,242,242,0.04)' : 'rgba(25,25,25,0.03)' }
 
   return (
     <section
       className="relative w-full overflow-hidden px-6 py-32 sm:px-8 md:py-40 transition-colors duration-300"
       style={{
-        backgroundColor: dark ? '#17120b' : '#efe9dc',
-        color: dark ? '#c8bfac' : '#5c5446',
+        backgroundColor: dark ? '#101010' : '#f2f2f2',
+        color: dark ? '#c4c4c4' : '#555555',
       }}
     >
       <div
@@ -114,16 +114,16 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
       <div className="relative z-10 mx-auto max-w-6xl">
         {/* intro */}
         <Label>
-          <span className="text-[#211b12]/80 dark:text-[#d8cfba]">public ledger</span>
-          <span aria-hidden className="text-[#8e7a5c] dark:text-[#b3a081]">→</span>
-          <span className="text-[#211b12]/80 dark:text-[#d8cfba]">shielded layer</span>
+          <span className="text-[#191919]/80 dark:text-[#d6d6d6]">public ledger</span>
+          <span aria-hidden className="text-[#7a7a7a] dark:text-[#a6a6a6]">→</span>
+          <span className="text-[#191919]/80 dark:text-[#d6d6d6]">shielded layer</span>
         </Label>
         <h2
-          className="mt-8 max-w-3xl font-display font-medium lowercase leading-[1.04] tracking-[-0.03em] text-[#211b12] dark:text-[#f1ece0]"
+          className="mt-8 max-w-3xl font-display font-medium lowercase leading-[1.04] tracking-[-0.03em] text-[#191919] dark:text-[#f5f5f5]"
           style={{ fontSize: 'clamp(2rem, 5.4vw, 3.6rem)' }}
         >
           public chains remember everything.{' '}
-          <span className="text-[#5c5446] dark:text-[#c8bfac]">the shielded layer forgets.</span>
+          <span className="text-[#555555] dark:text-[#c4c4c4]">the shielded layer forgets.</span>
         </h2>
 
         {/* Three narrative beats as a pinned, scaling card stack (React Bits
@@ -144,8 +144,8 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
                 key={s.n}
                 itemClassName={`flex min-h-[72vh] items-center rounded-[1.75rem] border px-6 py-12 sm:px-14 sm:py-16 transition-colors duration-300 ${
                   dark
-                    ? 'border-[#efe9dc]/10 bg-[#221b12] shadow-[0_30px_80px_-32px_rgba(0,0,0,0.6)]'
-                    : 'border-[#211b12]/10 bg-[#f5eedf] shadow-[0_30px_80px_-32px_rgba(33,27,18,0.15)]'
+                    ? 'border-[#f2f2f2]/10 bg-[#1c1c1c] shadow-[0_30px_80px_-32px_rgba(0,0,0,0.6)]'
+                    : 'border-[#191919]/10 bg-[#f7f7f7] shadow-[0_30px_80px_-32px_rgba(25,25,25,0.15)]'
                 }`}
               >
                 <div className="grid w-full grid-cols-1 items-center gap-x-12 gap-y-8 md:grid-cols-2">
@@ -154,13 +154,13 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
                   </div>
                   <div className={`max-w-md ${s.flip ? 'md:order-2' : 'md:order-1'}`}>
                     <Label>
-                      <span className="text-[#211b12] dark:text-[#d8cfba]">{s.n} · {s.label}</span>
-                      <span className="text-[#8e7a5c] dark:text-[#8f846b]">{s.coord}</span>
+                      <span className="text-[#191919] dark:text-[#d6d6d6]">{s.n} · {s.label}</span>
+                      <span className="text-[#7a7a7a] dark:text-[#8a8a8a]">{s.coord}</span>
                     </Label>
-                    <h3 className="mt-5 font-display text-[clamp(1.6rem,3.4vw,2.4rem)] font-medium lowercase leading-[1.05] tracking-[-0.02em] text-[#211b12] dark:text-[#f1ece0]">
+                    <h3 className="mt-5 font-display text-[clamp(1.6rem,3.4vw,2.4rem)] font-medium lowercase leading-[1.05] tracking-[-0.02em] text-[#191919] dark:text-[#f5f5f5]">
                       {s.title}
                     </h3>
-                    <p className="mt-5 text-[15px] font-medium leading-relaxed text-[#5c5446] dark:text-[#c8bfac]">{s.body}</p>
+                    <p className="mt-5 text-[15px] font-medium leading-relaxed text-[#555555] dark:text-[#c4c4c4]">{s.body}</p>
                   </div>
                 </div>
               </ScrollStackItem>
@@ -178,21 +178,21 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
         <SwapAmmMechanism />
 
         {/* modules + CTA — one card */}
-        <div className={`relative border px-6 py-10 sm:px-10 sm:py-12 ${dark ? 'border-[#efe9dc]/10' : 'border-[#211b12]/10'}`} style={cardBg}>
-          <div className="grid grid-cols-2 gap-px overflow-hidden border border-[#211b12]/12 dark:border-[#efe9dc]/12 bg-[#211b12]/12 dark:bg-[#efe9dc]/12 sm:grid-cols-4">
+        <div className={`relative border px-6 py-10 sm:px-10 sm:py-12 ${dark ? 'border-[#f2f2f2]/10' : 'border-[#191919]/10'}`} style={cardBg}>
+          <div className="grid grid-cols-2 gap-px overflow-hidden border border-[#191919]/12 dark:border-[#f2f2f2]/12 bg-[#191919]/12 dark:bg-[#f2f2f2]/12 sm:grid-cols-4">
             {MODULES.map((m) => (
               <a
                 key={m.k}
                 href={`#${m.to}`}
                 className={`group block px-5 py-7 transition ${
                   dark
-                    ? 'bg-[#221b12] hover:bg-[#2a2217]'
-                    : 'bg-[#f5eedf] hover:bg-[#ebe1cf]'
+                    ? 'bg-[#1c1c1c] hover:bg-[#242424]'
+                    : 'bg-[#f7f7f7] hover:bg-[#e8e8e8]'
                 }`}
               >
-                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#211b12] dark:text-[#d8cfba]">{m.k}</div>
-                <p className="mt-3 text-[13px] leading-relaxed text-[#5c5446] dark:text-[#c8bfac]">{m.d}</p>
-                <span className="mt-4 inline-block font-mono text-[10px] uppercase tracking-[0.18em] text-[#8e7a5c] transition-colors group-hover:text-[#826e51] dark:text-[#8a7f68] dark:group-hover:text-[#c9b489]">
+                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#191919] dark:text-[#d6d6d6]">{m.k}</div>
+                <p className="mt-3 text-[13px] leading-relaxed text-[#555555] dark:text-[#c4c4c4]">{m.d}</p>
+                <span className="mt-4 inline-block font-mono text-[10px] uppercase tracking-[0.18em] text-[#7a7a7a] transition-colors group-hover:text-[#6b6b6b] dark:text-[#858585] dark:group-hover:text-[#bfbfbf]">
                   open →
                 </span>
               </a>
@@ -200,7 +200,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
           </div>
           <button
             onClick={onEnter}
-            className="mt-10 font-mono text-[12px] uppercase tracking-[0.18em] text-[#8e7a5c] transition hover:text-[#826e51] dark:text-[#8a7f68] dark:hover:text-[#c9b489]"
+            className="mt-10 font-mono text-[12px] uppercase tracking-[0.18em] text-[#7a7a7a] transition hover:text-[#6b6b6b] dark:text-[#858585] dark:hover:text-[#bfbfbf]"
           >
             enter the shielded layer →
           </button>
