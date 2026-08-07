@@ -149,7 +149,7 @@ function AppFooter() {
             Private money on Stellar. Bridge in, hold, pay and trade — proven on-chain, never revealed.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#1b1610]/55 dark:text-zinc-500">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#141414]/55 dark:text-zinc-500">
           <NavLink to="/faucet" className="transition hover:text-[#1f1f1f] dark:hover:text-zinc-200">
             Faucet
           </NavLink>
