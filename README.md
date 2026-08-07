@@ -5,208 +5,253 @@
 <h1 align="center">Larel</h1>
 
 <p align="center">
-  A full-privacy platform on Stellar — bridge assets into a shielded layer, hold private multi-asset balances, send confidential payments, and trade on a zero-knowledge dark pool — all verified on-chain by Soroban smart contracts.
+  A confidential trading layer on Flare — hold shielded balances behind zero-knowledge proofs, and trade on a dark pool whose matching engine runs inside a Trusted Execution Environment. Orders are encrypted end-to-end, matched without ever being seen, and settled on-chain against a TEE signature.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Stellar-Testnet-1b1b1b" alt="Stellar Testnet" />
+  <img src="https://img.shields.io/badge/Flare-Coston2-1b1b1b" alt="Flare Coston2" />
+  <img src="https://img.shields.io/badge/FCC-TEE%20%C2%B7%20AMD%20SEV-1b1b1b" alt="Flare Confidential Compute" />
   <img src="https://img.shields.io/badge/ZK-UltraHonk%20%C2%B7%20BN254-1b1b1b" alt="UltraHonk / BN254" />
   <img src="https://img.shields.io/badge/Noir-1.0.0--beta.9-1b1b1b" alt="Noir 1.0.0-beta.9" />
-  <img src="https://img.shields.io/badge/Vite-React-1b1b1b" alt="Vite / React" />
   <img src="https://img.shields.io/badge/License-MIT-1b1b1b" alt="MIT" />
 </p>
 
 <p align="center">
+  <a href="#status">Status</a> ·
   <a href="#overview">Overview</a> ·
   <a href="#why-larel">Why Larel</a> ·
+  <a href="#prior-work-vs-new-work">Prior vs New Work</a> ·
   <a href="#the-system-flows">System Flows</a> ·
-  <a href="#smart-contracts">Contracts</a> ·
-  <a href="#how-it-works">How It Works</a> ·
   <a href="#architecture">Architecture</a> ·
-  <a href="#cross-chain-bridge">Cross-Chain Bridge</a> ·
   <a href="#quick-start">Quick Start</a>
 </p>
 
+---
+
+## Status
+
+**Larel is mid-migration from Stellar/Soroban to Flare. Read this section before anything else.**
+
+| Component | State |
+|---|---|
+| Noir circuits (5) | ✅ Working, unchanged by the migration — chain-agnostic |
+| TypeScript SDK (notes, Poseidon2, Merkle, proving) | ✅ Working, chain-agnostic core |
+| React frontend | ⚠️ Builds and runs, but the tx layer still targets Stellar |
+| `LarelPool.sol` + Solidity UltraHonk verifiers | ❌ Not written yet |
+| Flare Compute Extension (TEE matching engine, Go) | ❌ Not written yet |
+| FAssets / FXRP onboarding | ❌ Not written yet |
+| Flare / Coston2 deployment | ❌ **Nothing deployed. There are no Flare contract addresses yet.** |
+
+The Soroban contract workspace, the Ethereum light-client relayer, and the Stellar deploy
+scripts have been removed from the tree (recoverable from git history at `65a14b4`). The
+migration plan, including a go/no-go gas spike that must run before any Solidity is written,
+is in **[plan-migrate.md](./plan-migrate.md)**.
 
 ---
 
 ## Overview
 
-Larel is a full-privacy platform on Stellar. A user deposits classic Stellar assets (like XLM or USDC via the Stellar Asset Contract) or bridges assets from Ethereum Sepolia into a shielded pool. Once inside, balances hide behind Poseidon2 note commitments in a Merkle tree. Users can privately transfer value, trade on a zero-knowledge dark pool, or withdraw back to a public address — all without revealing amounts, assets, or participant links on-chain.
+Larel is a confidential trading layer on Flare. A user shields a balance — it becomes a
+Poseidon2 note commitment in a Merkle tree, with amount and owner sealed inside the hash. From
+there they can transfer value privately, withdraw back to a public address, or place an order
+on a dark pool where **the matching engine itself runs inside a Trusted Execution Environment**.
 
-Every state transition out of the shielded layer is gated by a **zero-knowledge UltraHonk proof generated client-side** (compiled from Noir circuits) and verified on-chain by Soroban smart contracts.
+Orders are ECIES-encrypted to the TEE's public key before they ever touch the chain. Inside the
+enclave they are decrypted, matched at the midpoint, and the result is signed. Only that
+signed result reaches the chain: which notes were spent and what was created — never the side,
+the size, or the limit price. The operator running the service cannot see the order book either.
 
-> **One pool. Four flows. One rule: your balances, transactions, and orders stay completely private.**
+Every state transition *out* of the shielded layer is gated by a **zero-knowledge UltraHonk
+proof generated client-side** (compiled from Noir circuits) and verified on-chain.
+
+> **One pool. Five flows. One rule: your balances, transactions, and orders stay private.**
 >
-> - **Bridge In** moves assets from Ethereum Sepolia into Stellar shielded notes via Ethereum sync-committee BLS verification.
-> - **Shield (Deposit)** moves a public Stellar asset into the pool, turning it into a shielded note commitment.
-> - **Private Pay (Transfer)** pays another user inside the pool with hidden amounts and sender → receiver links.
-> - **Swap (Dark Pool)** matches buy and sell orders at the midpoint of the order book without revealing prices or trade sizes.
-> - **Private Withdraw** cashes out shielded notes back to any public Stellar address, verified by the on-chain verifier.
-
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Why Larel](#why-larel)
-- [The System Flows](#the-system-flows)
-- [Smart Contracts](#smart-contracts)
-- [How It Works](#how-it-works)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Key Files](#key-files)
-- [Cross-Chain Bridge](#cross-chain-bridge)
-- [Quick Start](#quick-start)
-- [Hackathon](#hackathon)
-- [License](#license)
+> - **Onboard** brings XRP from XRPL to Flare as FXRP, attested by the Flare Data Connector.
+> - **Shield (Deposit)** moves a public balance into the pool, turning it into a note commitment.
+> - **Private Pay (Transfer)** pays another user inside the pool with hidden amounts and links.
+> - **Swap (Dark Pool)** — encrypted orders matched inside a TEE, settled against its signature.
+> - **Private Withdraw** cashes out shielded notes back to any public Flare address.
 
 ---
 
 ## Why Larel
 
-Stellar is fast, cost-effective, and fully transparent by design. Every payment, asset swap, and account balance is public and permanently indexed. For real-world use cases — payroll, B2B vendor payments, private treasury, and high-volume trading — that absolute transparency is a liability. 
+A public blockchain publishes your intent before it executes. On any on-chain order book or AMM,
+the size, the direction, and the price you will accept are visible the moment the transaction is
+broadcast — long enough to be front-run, and permanently enough that competitors can reconstruct
+your positioning afterwards. For anyone moving size, that is not a privacy nicety; it is a
+direct, measurable cost paid in slippage.
 
 The existing options fall short:
-- **Fresh wallets per transaction** — tedious, and funding trails link them on the public graph.
-- **Mixers or centralized custodians** — compromise self-custody and introduce third-party risk or potential seizure.
-- **Off-chain scaling or sidechains** — mean leaving Stellar's assets, speed, and liquidity behind.
+- **Splitting orders across wallets and days** — trades execution cost for time cost, and funding
+  trails relink the wallets anyway.
+- **Centralized dark pools** — restore confidentiality by taking custody and asking you to trust
+  an operator who can see everything and trade against you.
+- **On-chain "private" DEXes without confidential compute** — the matching logic still executes
+  in public, so the book leaks even when balances do not.
 
-**How can we enable privacy-preserving transactions and trades directly on Stellar without sacrificing self-custody?**
+**How do you match orders without anyone — including the operator — seeing the book, while still
+settling verifiably on-chain and never taking custody?**
 
-Larel answers this with six core primitives on the Soroban stack:
-1. **Client-side UltraHonk Proving (Noir)** — Proofs are generated client-side using Noir circuits compiled to WASM/JS. Secret inputs (note keys, amounts, blinding factors) never leave the device; the hash is Poseidon2 over BN254, running off-thread.
-2. **Shielded Note Pool** — Deposits create note commitments in an on-chain Merkle tree. Spending a note reveals only a nullifier (to prevent double-spend) and new commitments — keeping amounts and owners private.
-3. **Four system flows, one pool** — Shield, Pay (Transfer), Swap (Dark Pool), and Withdraw all operate against the same pool.
-4. **On-chain Verification** — Gated by UltraHonk verifier contracts over BN254. The proofs bind public inputs and parameters, preventing tampering.
-5. **Ethereum sync-committee BLS verification** — Native Soroban BLS12-381 signature checking updates Ethereum headers without SNARK-wrapping.
-6. **Merkle-Patricia Storage Proofs** — Direct verification of Ethereum state on Soroban enables true trust-minimized bridging.
+Larel's answer, built on Flare's enshrined protocols:
+
+1. **Client-side UltraHonk proving (Noir)** — proofs generated in the browser. Secret inputs
+   (note keys, amounts, blinding factors) never leave the device. Poseidon2 over BN254, off-thread.
+2. **Shielded note pool** — deposits create commitments in an on-chain Merkle tree. Spending
+   reveals only a nullifier, so old and new notes never link.
+3. **On-chain verification** — UltraHonk verifier contracts over BN254. Flare supports all EVM
+   opcodes through Cancun, so the BN254 pairing precompile needed for Honk verification is available.
+4. **A matching engine inside a TEE** — see below. This is the part ZK cannot do.
+5. **FDC instead of a hand-rolled bridge** — the Flare Data Connector attests XRPL payments
+   natively (`FdcHub.requestAttestation` → `FdcVerification`), so there is no light client and
+   no trusted relayer to build or operate.
+
+### Why a TEE, when we already have zero-knowledge proofs
+
+This is the crux of the design, and it is a structural argument rather than a preference.
+
+> A zero-knowledge proof proves a statement made by **one** prover about **their own** data.
+> Order matching is inherently **multi-party** — it requires seeing two different users' orders
+> at the same time. A single ZK proof cannot do that, no matter how the circuit is written.
+
+That leaves three options: a trusted operator (which destroys the premise), MPC (expensive and
+complex), or a **TEE**. Flare Confidential Compute provides the third as a protocol the network
+itself secures. So the split is clean, not decorative:
+
+| Layer | Mechanism | Why |
+|---|---|---|
+| Deposit / withdraw / transfer | **ZK** (Noir + UltraHonk) | Single-party statements: "I own this note, here is its nullifier" |
+| Order matching | **TEE** (Flare Compute Extension) | Multi-party computation over secret inputs — ZK structurally cannot |
+| Settlement | On-chain | TEE signature + nullifiers verified by the pool contract |
+
+Trust assumptions are stated plainly in [plan-migrate.md](./plan-migrate.md) §2b, including the
+ones the ZK layer does **not** carry: AMD for SEV integrity, and Google for Confidential Space
+and the vTPM attestation chain.
 
 <details>
 <summary><b>Meet Sarah</b> — the person this is for</summary>
 
 <br>
 
-Sarah runs a remote software studio and pays contractors in USDC on Stellar. Stellar's speed and fees are ideal, but her entire financial history, running balance, and payroll structures are publicly exposed to competitors and bad actors. She doesn't want to move to another chain — she wants to keep using Stellar's assets and liquidity, but keep the amounts and counterparties private. With Larel, Sarah can shield her USDC, pay her contractors' shielded keys privately, and let them withdraw to their public accounts, keeping the whole process confidential without surrendering custody of her funds.
+Sarah manages a small treasury and needs to rotate a meaningful position. On a public DEX her
+intent is visible the moment it hits the mempool: the size, the direction, the price she will
+accept. Bots front-run her, she eats the slippage, and her competitors learn her positioning
+from the chain afterwards. Splitting the order across days and wallets only trades one cost for
+another. With Larel she shields the balance, submits an order encrypted to the enclave, and it
+is matched at the midpoint against a counterparty who is equally invisible. Nothing about her
+intent is public — before, during, or after — yet the settlement is verified on-chain and she
+never hands custody to anyone.
 
 </details>
 
 ---
 
+## Prior work vs new work
+
+The Flare Summer Signal submission requires a clear separation between what existed before and
+what is new. This is that separation.
+
+### Existed before (built on Stellar/Soroban)
+
+- The 5 Noir circuits (`withdraw`, `transfer`, `place_order`, `match_orders`, `cancel_order`)
+  and the shared `larel_lib`.
+- The TypeScript SDK: Poseidon2, Merkle tree, note/nullifier derivation, client-side proving.
+- The React frontend and its flows.
+- A working Soroban deployment on Stellar Testnet, with an end-to-end private round-trip
+  verified on-chain using a real 14,592-byte UltraHonk proof (deposit 1 XLM → shielded note →
+  ZK withdraw). That deployment is **prior work and is no longer the target**; its contract
+  workspace has been removed from this tree.
+
+### Ported / integrated / newly built for Flare
+
+- **Removed** the entire hand-rolled trust-minimized bridge — Ethereum sync-committee BLS
+  verification, Merkle-Patricia storage proofs, SSZ, and the finality relayer (~4 Rust crates
+  plus a TypeScript relayer). Flare's FDC provides this natively. This is a deliberate
+  simplification, not a loss of scope: it replaces bespoke cryptography we had to maintain with
+  an enshrined protocol the network already secures.
+- **Retargeted the verifiers** from Soroban WASM to Solidity. The circuits already build with a
+  keccak transcript, which is exactly what `bb write_solidity_verifier --scheme ultra_honk`
+  requires — so the proving format carries over unchanged.
+- **Rewriting** the pool contract and the SDK/frontend transaction layer for EVM (viem/wagmi).
+- **New**: the matching engine moves from an ordinary off-chain TypeScript service into a Flare
+  Compute Extension running in a TEE — the single biggest change, and the one the track is about.
+  Orders arrive ECIES-encrypted; the operator never sees the book.
+- **New**: FXRP onboarding through FAssets, with direct minting as the target flow.
+
+See [plan-migrate.md](./plan-migrate.md) for the phase breakdown and the risks.
+
+---
+
 ## The System Flows
 
-Larel coordinates multiple flows against the shielded pool, changing only the verification circuit and public inputs.
+Larel coordinates several flows against one shielded pool, changing only the circuit and public inputs.
 
-| Flow | **Bridge In** | **Shield (Deposit)** | **Private Pay (Transfer)** | **Swap (Dark Pool)** | **Private Withdraw** |
+| Flow | **Onboard (FXRP)** | **Shield (Deposit)** | **Private Pay (Transfer)** | **Swap (Dark Pool)** | **Private Withdraw** |
 |---|---|---|---|---|---|
-| **Direction** | Ethereum → Stellar Shielded | Stellar Public → Shielded | Shielded → Shielded | Shielded → Shielded | Shielded → Stellar Public |
-| **Circuit** | Merkle-Patricia Storage Proof | none (Public-to-Shielded Deposit) | `transfer` circuit | `place_order`, `match_orders` | `withdraw` circuit |
-| **Inputs/Outputs** | Ethereum lock storage path | Public asset tokens | 2 input notes → 2 output notes | Order commitment & notes | Input note → public recipient |
-| **Recipient** | Stellar Shielded Key | Stellar Shielded Key | Shielded Key | Shielded Key (DEX pool) | Public Stellar Address (`G...`) |
-| **Effect** | Shielded note created | Shielded note created | Inputs nullified, outputs created | Funds locked, traded, and settled | Input nullified, public tokens out |
-| **Result** | Sepolia ETH/USDC → Stellar note | Balance shielded | Balance transferred | Midpoint matching, atomic swap | Balance public again |
-| **What stays hidden** | Origin link & details | In-pool balance | Amount, asset, sender → receiver link | Side, size, price, trade match | Amount, asset, withdraw source |
-
----
-
-## Smart Contracts
-
-### Addresses (Stellar Testnet)
-
-The full system is live and verified on Stellar Testnet.
-
-| Contract | Address | Description |
-|---|---|---|
-| **Larel Pool** | [`CBZNNVUKTG6YSVT3NGV7MDVL5ZQO5D4KLLIRFAGBCORPH7Q62ZHS5RP3`](https://stellar.expert/explorer/testnet/contract/CBZNNVUKTG6YSVT3NGV7MDVL5ZQO5D4KLLIRFAGBCORPH7Q62ZHS5RP3) | Core pool handling deposits, transfers, swaps, and withdrawals. |
-| **Verifier · withdraw** | [`CDS245ZQLXFIYD2TPSJWZLAO6TOZOGRF6FQWAJ35J5SG6A7WNMHUMD5B`](https://stellar.expert/explorer/testnet/contract/CDS245ZQLXFIYD2TPSJWZLAO6TOZOGRF6FQWAJ35J5SG6A7WNMHUMD5B) | On-chain UltraHonk verifier checking withdraw proofs. |
-| **Verifier · transfer** | [`CCTHUAA3I4R2BRUQEFREHQ3AWVLTCZECAZ7JRG5S23FM44LP27RY5NZB`](https://stellar.expert/explorer/testnet/contract/CCTHUAA3I4R2BRUQEFREHQ3AWVLTCZECAZ7JRG5S23FM44LP27RY5NZB) | On-chain UltraHonk verifier checking transfer proofs. |
-| **Verifier · place_order** | [`CABWY7YM7C4FCJBGQ7KG47N6NKZOBHWGMHAEYDTOGE6LDPOLZNGR2BF6`](https://stellar.expert/explorer/testnet/contract/CABWY7YM7C4FCJBGQ7KG47N6NKZOBHWGMHAEYDTOGE6LDPOLZNGR2BF6) | On-chain UltraHonk verifier checking order placement. |
-| **Verifier · match_orders** | [`CCKOCCPIYRRSCFNGDW3BDOGW4R2V7XY6KYHZVJDFB5KTKR5U3LPMAB5T`](https://stellar.expert/explorer/testnet/contract/CCKOCCPIYRRSCFNGDW3BDOGW4R2V7XY6KYHZVJDFB5KTKR5U3LPMAB5T) | On-chain UltraHonk verifier checking midpoint matches. |
-| **Verifier · cancel_order** | [`CCU4JPTB4KRSG2N6YOTPT7SDXMYIC7RJOMEHUCR44FADEBRBWXQTTB2M`](https://stellar.expert/explorer/testnet/contract/CCU4JPTB4KRSG2N6YOTPT7SDXMYIC7RJOMEHUCR44FADEBRBWXQTTB2M) | On-chain UltraHonk verifier checking order cancellations. |
-
-### Live ZK Proof Verification (E2E)
-
-Verified end-to-end on the current pool with a **real Noir/UltraHonk proof** (14,592-byte proof / 1,760-byte VK, keccak transcript) checked inside the Soroban contract:
-- **Deposit** 1 XLM → shielded note at leaf 0, commitment `0f090472…78e2…f92d0a` ([tx `cdaa631c…`](https://stellar.expert/explorer/testnet/tx/cdaa631c68bedd73a7cf469285e21c4d8ece913100baf9ae6f626db542dca614), SUCCESS).
-- **Withdraw** with a real ZK proof → verified on-chain by the `withdraw` verifier, nullifier `02e885ea…5f85884`, 1 XLM released to the recipient ([tx `d2d2aca3…`](https://stellar.expert/explorer/testnet/tx/d2d2aca363087a082483b905d5e7ae11ede07d934ed9ccfd46ffcfe9c44ad313), SUCCESS).
-
----
-
-## How It Works
-
-**User Flow** — `Connect → Bridge / Shield → Receive / Pay Privately → Trade / Swap → Withdraw`
-1. **Connect** Freighter wallet and MetaMask (for Ethereum L1 bridge).
-2. **Shield** public assets (XLM/USDC) into the pool, or **Bridge** assets from Ethereum Sepolia.
-3. **Pay** a friend's shielded address privately (2-in/2-out transfer).
-4. **Trade** assets on the Dark Pool (Swap) by placing midpoint orders.
-5. **Withdraw** to a public Stellar address whenever needed.
-
-**Proof Flow (Browser/Client)** — `Derive keys → Build circuit inputs → Prove (Noir) → Prepare Soroban tx`
-1. **Derive keys** from a wallet signature (cached locally).
-2. **Build inputs** from unspent notes, target amounts, and recipient details.
-3. **Prove** UltraHonk over BN254 with Poseidon2 using client-side Noir/bb.
-4. **Prepare** and submit the Soroban transaction containing the proof and public inputs.
-
-**On-chain Flow**
-```
-User / Submitter            Pool Contract (Soroban)                 Verifier
-       |                             |                                  |
-     Transact ---------------------->|                                  |
-       |                             |-- verify UltraHonk proof ------->|
-       |                             |-- spend nullifiers & add leaf    |
-       |                             |<-- verification result (Ok) -----|
-       |<-- confirmed tx ------------|
-```
+| **Direction** | XRPL → Flare | Flare public → shielded | Shielded → shielded | Shielded → shielded | Shielded → Flare public |
+| **Mechanism** | FDC attestation + FAssets minting | ERC-20 `transferFrom` | `transfer` circuit | **TEE matching engine** + signed settlement | `withdraw` circuit |
+| **Inputs/Outputs** | XRPL payment + `XRPPayment` proof | Public FXRP | 2 input notes → 2 output notes | Order commitment & notes | Input note → public recipient |
+| **Recipient** | Flare address (encoded in XRPL memo/destination tag) | Shielded key | Shielded key | Shielded key | Public Flare address (`0x…`) |
+| **Effect** | FXRP minted | Note commitment created | Inputs nullified, outputs created | Funds locked, traded, settled | Input nullified, tokens out |
+| **What stays hidden** | — (public by design) | In-pool balance | Amount, asset, sender → receiver link | Side, size, price, match | Amount, asset, withdraw source |
 
 ---
 
 ## Architecture
 
-### System Flow
+### Target system flow
 
 ```mermaid
 sequenceDiagram
     participant User as User (Browser)
-    participant Wallet as Wallet (Freighter/MetaMask)
+    participant XRPL as XRP Ledger
+    participant FDC as Flare Data Connector
+    participant AM as AssetManager (FAssets)
     participant SDK as Larel SDK
-    participant Relayer as Bridge Relayer (untrusted)
-    participant Pool as Pool Contract (Soroban)
-    participant Verifier as UltraHonk Verifier
+    participant Pool as LarelPool.sol
+    participant Verifier as HonkVerifier.sol
+    participant TEE as Flare Compute Extension (TEE)
 
-    alt Bridge In (Sepolia -> Stellar Shielded)
-        User->>Wallet: Lock assets on Sepolia Bridge L1
-        Relayer->>Pool: Relay Sepolia Header (updates EthLightClient state root)
-        User->>SDK: Generate inclusion storage proof
-        User->>Pool: bridge_in(proof, commitment)
-        Pool->>Pool: Verify MPT proof & mint note commitment
-    else Deposit (Stellar Public -> Shielded)
-        User->>Wallet: Approve SAC token transfer
-        User->>Pool: deposit(asset, amount, commitment)
-        Pool->>Pool: Pull tokens & add note commitment
-    else Private Transfer / Pay
-        User->>SDK: Build UltraHonk transfer proof (2-in/2-out)
-        User->>Pool: transfer(proof, public_inputs)
-        Pool->>Verifier: verify transfer proof
-        Pool->>Pool: Spend nullifiers & insert output commitments
+    alt Onboard (XRPL -> Flare)
+        User->>XRPL: Send XRP, recipient encoded in memo / destination tag
+        User->>FDC: requestAttestation (XRPPayment)
+        FDC-->>User: proof + Merkle path via DA Layer
+        User->>AM: executeDirectMinting(proof, ...)
+        AM->>User: FXRP (ERC-20) minted
+    else Shield (public -> shielded)
+        User->>Pool: deposit(commitment) + ERC-20 transferFrom
+        Pool->>Pool: Append commitment to Merkle tree
+    else Private Transfer / Withdraw (ZK)
+        User->>SDK: Build UltraHonk proof client-side
+        User->>Pool: transfer / withdraw (proof, publicInputs)
+        Pool->>Verifier: verify proof over BN254
+        Pool->>Pool: Spend nullifiers, insert output commitments
+    else Dark Pool Order (TEE)
+        User->>SDK: ECIES-encrypt {side, size, price} to TEE public key
+        User->>Pool: LarelInstructionSender.placeOrder(ciphertext)
+        Pool->>TEE: TeeExtensionRegistry.sendInstructions()
+        TEE->>TEE: decrypt, match at midpoint (FTSOv2 reference price)
+        TEE-->>Pool: signed match result
+        Pool->>Pool: Verify TEE signature, nullify inputs, append outputs
     end
 ```
 
-### Proof Pipeline
+### Proof pipeline
 
 ```mermaid
 graph TD
-    BI[Bridge In: Sepolia ETH/USDC] --> SDK[Larel SDK]
-    DEP[Deposit: Stellar Public Assets] --> POOL[Larel Pool Contract]
-    PAY[Private Transfer: Shielded Pay] --> SDK
-    SWAP[Swap: Dark Pool Orders] --> SDK
+    FXRP[FXRP via FAssets] --> POOL[LarelPool.sol]
+    DEP[Deposit] --> POOL
+    PAY[Private Transfer] --> SDK[Larel SDK]
+    SWAP[Dark Pool Orders] --> SDK
 
     SDK --> PROVE[Noir Client Prover<br/>UltraHonk over BN254 + Poseidon2]
     PROVE --> PREP[Proof + Public Inputs]
 
-    PREP --> SUBMIT[Freighter Wallet signs & submits]
+    PREP --> SUBMIT[EVM wallet signs & submits]
     SUBMIT --> POOL
 
-    POOL --> VERIFY[On-chain UltraHonk Verifiers]
+    POOL --> VERIFY[HonkVerifier.sol]
     VERIFY -->|Valid| STATE[State Updated: Merkle Tree & Nullifiers]
 ```
 
@@ -216,42 +261,28 @@ graph TD
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | React 18, Vite, Tailwind CSS v3, Three.js, React Three Fiber (R3F) |
-| **Wallet** | Freighter (via `@creit.tech/stellar-wallets-kit`), MetaMask (via `wagmi`/`viem`) |
-| **Blockchain** | Stellar Testnet (Soroban), Ethereum Sepolia (L1 Bridge) |
-| **Stellar SDK** | `@stellar/stellar-sdk` |
+| **Frontend** | React 18, Vite, Tailwind CSS v3, Three.js, React Three Fiber |
+| **Wallet** | EVM wallets via `wagmi` / `viem` |
+| **Blockchain** | Flare Coston2 testnet (chainId 114), XRP Ledger testnet |
+| **Flare protocols** | Flare Confidential Compute (FCC/TEE), FTSOv2 (midpoint reference price), FDC + FAssets/FXRP (asset onboarding) |
+| **TEE** | Flare Compute Extension in Go, GCP Confidential Space on AMD SEV, vTPM attestation |
 | **Zero-Knowledge** | Noir (`1.0.0-beta.9`), Barretenberg (`0.87.0`), UltraHonk over BN254, Poseidon2 |
-| **Ethereum Client** | `EthLightClient` (BLS12-381 verification on Soroban), Merkle-Patricia Trie (MPT) verification |
+| **Contracts** | Solidity, Foundry |
 | **Off-chain Matcher** | TypeScript order matching engine |
-| **Base PoC** | Built natively from scratch for Stellar Hacks: Real-World ZK |
 
 ---
 
 ## Key Files
 
-The core implementation is organized into the following modules:
-
 | Component | Directory / File | Description |
 |---|---|---|
-| **Noir Circuits** | [`circuits/noir/`](./circuits/noir/) | Contains Noir code for `withdraw`, `transfer`, `place_order`, `match_orders`, and `cancel_order`. |
-| **Smart Contracts** | [`contracts/`](./contracts/) | Soroban smart contracts including the main pool (`larel-pool`) and UltraHonk verifiers. |
-| **Larel SDK** | [`sdk/`](./sdk/) | TypeScript library to compute commitments, nullifiers, Merkle trees, generate Noir proofs, and build transactions. |
-| **Ethereum Bridge L1** | [`bridge/l1/`](./bridge/l1/) | Solidity bridge contract (`LarelBridgeL1`) to lock/unlock funds on Sepolia. |
-| **Light Client Relayer** | [`bridge/relayer/`](./bridge/relayer/) | Untrusted TypeScript relayer feeding Ethereum finality headers and BLS signatures to Soroban. |
-| **Order Matcher** | [`matcher/`](./matcher/) | Off-chain match engine to pair sealed orders and execute midpoint swaps on-chain. |
-| **Web Frontend** | [`frontend/`](./frontend/) | React/Vite dashboard to bridge, pay, trade, and track portfolio. |
-| **Specifications** | [`SPEC.md`](./SPEC.md), [`SHARED.md`](./SHARED.md), [`TOOLCHAIN.md`](./TOOLCHAIN.md) | Design specs, cross-component cryptographic constants, and toolchain configurations. |
-
----
-
-## Cross-Chain Bridge
-
-The cross-chain bridge is a trust-minimized pipeline moving assets from Ethereum Sepolia to Stellar Testnet:
-1. **Lock**: Users lock ETH/USDC in the L1 Solidity bridge contract on Sepolia (`0xcF40c553…`).
-2. **Light Client Sync**: An Ethereum sync-committee BLS signature is verified natively on Soroban (`EthLightClient`), updating Ethereum headers.
-3. **Minting Shielded Notes**: `bridge_in` verifies the inclusion of the L1 lock via Merkle-Patricia storage proof, generating a shielded note natively on Stellar.
-
-No trusted relayer or custodian holds authority. Full instructions and proofs are detailed in [BRIDGE_DEPLOYMENT.md](./BRIDGE_DEPLOYMENT.md).
+| **Noir Circuits** | [`circuits/noir/`](./circuits/noir/) | `withdraw`, `transfer`, `place_order`, `match_orders`, `cancel_order`, plus `larel_lib`. |
+| **Larel SDK** | [`sdk/`](./sdk/) | Commitments, nullifiers, Merkle trees, Noir proving, transaction building. |
+| **Solidity workspace** | [`bridge/l1/`](./bridge/l1/) | Existing Foundry project. To be repurposed as the Flare contract workspace. |
+| **Order Matcher** | [`matcher/`](./matcher/) | Off-chain engine pairing sealed orders for midpoint swaps. |
+| **Web Frontend** | [`frontend/`](./frontend/) | React/Vite dashboard: onboard, pay, trade, portfolio. |
+| **Migration plan** | [`plan-migrate.md`](./plan-migrate.md) | Phases, risks, and the go/no-go gas spike. |
+| **Bounty brief** | [`CONTEXT.md`](./CONTEXT.md) | Flare Summer Signal · Bounty 2 (Confidential Compute Apps) requirements and resources. |
 
 ---
 
@@ -260,50 +291,53 @@ No trusted relayer or custodian holds authority. Full instructions and proofs ar
 ### Prerequisites
 
 - Node.js 20+ and `pnpm`
-- [Freighter Wallet](https://www.freighter.app/) configured for Stellar Testnet
-- Rust toolchain and target `wasm32-unknown-unknown`
-- Pinned cryptographic tools (refer to [TOOLCHAIN.md](./TOOLCHAIN.md) for pinned versions):
+- An EVM wallet configured for Flare Coston2 (chainId 114)
+- Pinned cryptographic tools:
   - `nargo` `1.0.0-beta.9`
   - `bb` `0.87.0`
-  - `stellar-cli` `27.0.0`
 
-### 1. Environment Setup
+### 1. Environment setup
 
-Source the environment script to place the pinned toolchain binaries onto your `PATH`:
 ```bash
 source ./env.sh
 ```
 
-### 2. Run Circuit Tests
+### 2. Run circuit tests
 
-Validate the Noir circuits locally:
 ```bash
 cd circuits/noir/withdraw && nargo test
 ```
 
-### 3. Build Smart Contracts
+Or build, prove and export VKs for all five circuits:
 
-Compile the Soroban smart contracts to WebAssembly:
 ```bash
-cd contracts && cargo build --target wasm32-unknown-unknown --release
+./circuits/noir/build_all.sh
 ```
 
-### 4. Build SDK and Start Frontend
+Proof MUST be 14,592 bytes and VK MUST be 1,760 bytes — enforced by the script.
 
-Install workspace dependencies, build the packages, and launch the Vite development server:
+### 3. Build SDK and start the frontend
+
 ```bash
-# In the repository root
 pnpm install
-pnpm build
+pnpm --filter @larel/sdk build
 pnpm --filter frontend dev
 ```
-Open `http://localhost:5173` to interact with the Larel application.
 
-### 5. Running End-to-End Tests
+Open `http://localhost:5173`.
 
-Verify the complete deposit and ZK-withdraw loop against the live testnet contracts:
+> The frontend's transaction layer still targets Stellar and will not transact against Flare
+> until Phase 3 of [plan-migrate.md](./plan-migrate.md) lands.
+
+### 4. Generate a Solidity verifier
+
+Not yet wired into the build, but this is the command the migration depends on:
+
 ```bash
-./scripts/e2e.sh
+cd circuits/noir/withdraw
+nargo compile
+bb write_vk --scheme ultra_honk -b target/withdraw.json -o target/vk
+bb write_solidity_verifier --scheme ultra_honk -k target/vk/vk -o target/HonkVerifier.sol
 ```
 
 ---
@@ -312,9 +346,14 @@ Verify the complete deposit and ZK-withdraw loop against the live testnet contra
 
 | | |
 |---|---|
-| **Event** | Stellar Hacks:(APAC Stellar ) |
-| **Track** | Payment & Consumer Applications / DeFi & Ecosystem Composability |
-| **Network** | Stellar Testnet |
+| **Event** | Flare Summer Signal |
+| **Bounty** | Bounty 2 — Confidential Compute Apps |
+| **Network** | Flare Coston2 testnet (chainId 114) |
+
+The submission targets two of the track's named directions directly: **confidential orderbooks**
+and **secure matching engines**. See [plan-migrate.md](./plan-migrate.md) §2b for the four
+design questions the track requires answering — what runs privately in the TEE, what attests
+it, what reaches the chain, and what trust assumptions remain.
 
 ---
 
