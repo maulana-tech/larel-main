@@ -9,7 +9,7 @@
 //!   merkle_root, nullifier_0, nullifier_1,
 //!   out_commitment_0, out_commitment_1, ext_data_hash
 
-use dep::lax_stell_lib as w;
+use dep::larel_lib as w;
 
 fn main(
     // ---- public inputs (order is load-bearing: SHARED sec 7) ----
