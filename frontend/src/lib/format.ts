@@ -45,9 +45,12 @@ export function isPositiveAmount(input: string): boolean {
   return Number.isFinite(n) && n > 0
 }
 
-const STELLAR_ADDRESS = /^G[A-Z2-7]{55}$/
+const FLARE_ADDRESS = /^G[A-Z2-7]{55}$/
 
-/** Lightweight check for a classic Stellar public key (G… base32, 56 chars). */
-export function isValidStellarAddress(addr: string): boolean {
-  return STELLAR_ADDRESS.test(addr.trim())
+/** Lightweight check for a classic Flare public key (G… base32, 56 chars). */
+export function isValidFlareAddress(addr: string): boolean {
+  return FLARE_ADDRESS.test(addr.trim())
 }
+
+export const isValidStellarAddress = isValidFlareAddress
+
