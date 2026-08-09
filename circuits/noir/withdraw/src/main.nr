@@ -6,7 +6,7 @@
 //! Public inputs (SHARED sec 7, IN THIS ORDER):
 //!   merkle_root, nullifier, recipient_hash, amount, asset_id
 
-use dep::lax_stell_lib as w;
+use dep::larel_lib as w;
 
 fn main(
     // ---- public inputs (order is load-bearing: SHARED sec 7) ----
