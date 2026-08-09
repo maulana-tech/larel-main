@@ -21,7 +21,7 @@ export function Receive({ receiveCode }: { receiveCode: string | null }) {
     <div className="space-y-5">
       <div className="flex items-center justify-center rounded-2xl border border-ink-700 bg-ink-900/40 p-8">
         <img src={logoLight} alt="Larel" className="h-20 w-auto dark:hidden" />
-        <img src={logoDark} alt="Larel" className="hidden h-20 w-auto dark:block" />
+        <img src={logoDark} alt="Larel" className="hidden h-20 grayscale w-auto dark:block" />
       </div>
       {receiveCode ? (
         <>
