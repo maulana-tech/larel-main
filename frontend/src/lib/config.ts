@@ -11,7 +11,7 @@
  *   native SAC  CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
  *   passphrase  "Test SDF Network ; September 2015"
  */
-import { assetFromSac, hash2, NATIVE_ASSET_ID, toField, type Field } from '@larel/sdk'
+import { hash2, NATIVE_ASSET_ID, toField, type Field } from '@larel/sdk'
 import type { AssetCode } from './larel-sdk'
 
 // Tolerate a missing `import.meta.env` (Node/SSR/test contexts, where Vite hasn't injected it)
@@ -41,7 +41,7 @@ function flag(key: string): boolean {
  */
 export const POOL_CONTRACT_ID = env(
   'VITE_LAREL_POOL',
-  'CADZY7CMMX3PL47Q7SRXNEDV7AR6ZDDLAD7WCITRRTROXOVSFNAR5IMD',
+  '0x16dCC523fa9F57C08b0D7B3AD92Ec6cE7819A6Cb',
 )
 
 /** Native (XLM) Stellar Asset Contract address. */
@@ -158,7 +158,7 @@ export const ASSET_CONFIG: Record<AssetCode, AssetConfig> = {
   USDC: {
     code: 'USDC',
     // Derived from the SAC address when configured; otherwise a placeholder id.
-    assetId: USDC_SAC ? assetFromSac(USDC_SAC, 'USDC').assetId : 0n,
+    assetId: USDC_SAC ? toField(BigInt(USDC_SAC)) : 0n,
     sac: USDC_SAC || undefined,
     decimals: 7,
     priceUsd: 1,
