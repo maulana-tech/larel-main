@@ -60,10 +60,24 @@ for c in "${CIRCUITS[@]}"; do
       -b "target/${c}.json" -w target/witness.gz -o target \
       --output_format bytes_and_fields
 
-    echo "[5/5] bb write_vk"
+    echo "[5/6] bb write_vk"
     bb write_vk --scheme ultra_honk --oracle_hash keccak \
       -b "target/${c}.json" -o target \
       --output_format bytes_and_fields
+
+    echo "[6/6] bb write_solidity_verifier"
+    bb write_solidity_verifier --scheme ultra_honk -k target/vk -o target/HonkVerifier.sol
+    
+    # CamelCase the circuit name, e.g. place_order -> PlaceOrder
+    cam_c=$(echo "$c" | awk -F_ '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1' OFS="")
+    contract_name="${cam_c}Verifier"
+    
+    # Rename contract and downgrade pragma
+    sed -i '' "s/contract HonkVerifier/contract ${contract_name}/g" target/HonkVerifier.sol
+    sed -i '' "s/function HonkVerifier/function ${contract_name}/g" target/HonkVerifier.sol
+    sed -i '' "s/pragma solidity ^0.8.27;/pragma solidity ^0.8.20;/g" target/HonkVerifier.sol
+    
+    mv target/HonkVerifier.sol "target/${contract_name}.sol"
   )
 
   proof_bytes="$(filesize "${pkg}/target/proof")"
@@ -83,9 +97,17 @@ for c in "${CIRCUITS[@]}"; do
   # Copy deployment/integration fixtures.
   out="${ARTIFACTS_DIR}/${c}"
   mkdir -p "${out}"
+  cam_c=$(echo "$c" | awk -F_ '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1' OFS="")
+  contract_name="${cam_c}Verifier"
+
   cp "${pkg}/target/vk"             "${out}/vk"
   cp "${pkg}/target/proof"          "${out}/proof"
   cp "${pkg}/target/public_inputs"  "${out}/public_inputs"
+  cp "${pkg}/target/${contract_name}.sol" "${out}/${contract_name}.sol"
+  
+  # Also copy to bridge workspace
+  mkdir -p "../../bridge/l1/src/verifiers"
+  cp "${pkg}/target/${contract_name}.sol" "../../bridge/l1/src/verifiers/${contract_name}.sol"
   echo "Artifacts -> ${out}/{vk,proof,public_inputs}"
   echo
 done
