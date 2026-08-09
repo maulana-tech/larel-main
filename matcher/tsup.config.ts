@@ -5,7 +5,7 @@ export default defineConfig({
   format: ["esm"],
   // The matcher is a service, not a published library: emitting JS is enough and keeps
   // the build fast and resolution-error-free (the SDK ships its own .d.ts).
-  dts: false,
+  dts: true,
   sourcemap: true,
   clean: true,
   target: "es2022",
