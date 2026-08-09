@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import type { CSSProperties } from 'react'
 import ScrambleCycle from './ScrambleCycle'
 import { StoryShielded } from './StoryShielded'
-import heroBanner from '../assets/hero-banner.jpg'
+
 import logoDark from '../assets/logo-dark.png'
 import logoLight from '../assets/logo-light.png'
 import { ThemeToggle } from './ThemeToggle'
@@ -16,7 +16,7 @@ const ROTATING = ['shielded', 'unlinkable', 'verified', 'private', 'yours']
  *  (`once`) and then hold: they're fixed readouts, not a loop. Durations are
  *  staggered so the three resolve in sequence rather than snapping together. */
 const NET_TITLE = ['Testnet']
-const NET_VALUE = ['Stellar · SDF Horizon']
+const NET_VALUE = ['Flare · Coston2']
 const PROOF_TITLE = ['Proof']
 const PROOF_VALUE = ['UltraHonk · BN254']
 const SHIELD_TITLE = ['Shielded']
@@ -132,68 +132,14 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           same black-and-white world as the app surface rather than a standalone
           illustration. `isolate` keeps the blend layers acting on the image
           only, never on the page beneath. Grain is a separate static overlay. */}
-      <div className="absolute inset-0 isolate overflow-hidden">
-        <img
-          src={heroBanner}
-          alt=""
-          aria-hidden
-          className="h-full w-full object-cover"
-          style={{
-            filter: dark
-              ? 'grayscale(1) contrast(1.05) brightness(0.44)'
-              : 'grayscale(1) contrast(0.9) brightness(1.06)',
-          }}
-        />
-        {/* Ground wash — sinks the image toward the story ground (dark) or the
-            broken-white page (light) so the headline keeps its contrast. */}
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundColor: dark ? '#101010' : '#f2f2f2',
-            mixBlendMode: dark ? 'multiply' : 'screen',
-            opacity: dark ? 0.5 : 0.55,
-          }}
-        />
-      </div>
-
-      {/* Static film grain — fixed noise, does not shimmer. */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0.45 0.45 0 -0.4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E\")",
-          backgroundSize: '90px 90px',
-          opacity: dark ? 0.6 : 0.25,
-        }}
-      />
-
       <ChartBackground />
-
-      {/* Keep the upper half a touch darker for the white type, and weight the
-          left edge where the headline now sits so it always clears the banner. */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: dark
-            ? 'linear-gradient(to bottom, rgba(14,14,14,0.55), rgba(14,14,14,0.12) 42%, transparent 70%)'
-            : 'linear-gradient(to bottom, rgba(242,242,242,0.55), rgba(242,242,242,0.12) 42%, transparent 70%)',
-        }}
-      />
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: dark
-            ? 'linear-gradient(to right, rgba(14,14,14,0.62) 0%, rgba(14,14,14,0.34) 38%, transparent 66%)'
-            : 'linear-gradient(to right, rgba(242,242,242,0.72) 0%, rgba(242,242,242,0.4) 38%, transparent 66%)',
-        }}
-      />
 
       {/* Header — fixed, inverts against whatever scrolls behind it. */}
       <header className="fixed inset-x-0 top-0 z-50 mix-blend-difference">
         <div className="flex items-center justify-between px-8 py-5">
           <a href="#/" className="flex items-center gap-3">
             {/* Dark logo (black mark) works with mix-blend-difference: inverts to white on dark bg */}
-            <img src={logoDark} alt="Larel" className="h-12 w-auto" />
+            <img src={logoDark} alt="Larel" className="h-12 w-auto grayscale" />
             <span className="font-display text-base font-semibold tracking-tight text-[#f2f2f2]">
               larel
             </span>
@@ -219,14 +165,13 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
             <span
               className={`block font-mono text-[10px] uppercase tracking-[0.28em] ${dark ? 'text-[#f2f2f2]/55' : 'text-[#191919]/55'}`}
             >
-              [ Stellar · Soroban · zero-knowledge ]
+              [ Flare · Compute Extension · zero-knowledge ]
             </span>
 
             <h1
               className="mt-7 font-display font-medium uppercase leading-[0.98] tracking-[-0.04em]"
               style={{
                 fontSize: 'clamp(2.4rem, 6.2vw, 5.25rem)',
-                textShadow: dark ? '0 2px 30px rgba(14,14,14,0.45)' : 'none',
                 color: dark ? '#fafafa' : '#191919',
               }}
             >
@@ -247,7 +192,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
             <p
               className={`mt-8 max-w-xl text-[15px] font-medium leading-relaxed ${dark ? 'text-[#f2f2f2]/70' : 'text-[#191919]/70'}`}
             >
-              Deposit, transfer and trade on Stellar with amounts, balances and counterparties
+              Deposit, transfer and trade on Flare with amounts, balances and counterparties
               hidden — every move still verified on-chain by a zero-knowledge proof.
             </p>
 
@@ -311,21 +256,14 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
                 color: dark ? '#f2f2f2' : '#191919',
               }}
       >
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.12]"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.35 0.35 0.35 0 -0.36'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E\")",
-            backgroundSize: '90px 90px',
-          }}
-        />
+
 
         <div className="relative flex items-start justify-between">
           <p className={`max-w-xs text-[15px] font-medium leading-snug ${dark ? 'text-[#f2f2f2]/80' : 'text-[#191919]/80'}`}>
-            Feel free to reach out if you want private money on Stellar — or simply have a chat.
+            Feel free to reach out if you want private money on Flare — or simply have a chat.
           </p>
           <a href="#/" className="transition hover:opacity-75">
-            <img src={dark ? logoDark : logoLight} alt="Larel" className="h-36 w-auto opacity-85" />
+            <img src={dark ? logoDark : logoLight} alt="Larel" className="h-36 w-auto opacity-85 grayscale" />
           </a>
         </div>
 
@@ -345,9 +283,9 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           <div className="animate-lax-marquee" style={{ fontSize: 'clamp(2rem, 8.2vw, 6.5rem)', color: dark ? '#a6a6a6' : '#7a7a7a' }}>
             <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>LAREL</a>
             <span className="mx-8 opacity-45">·</span>
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>STELLAR</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>FLARE</a>
             <span className="mx-8 opacity-45">·</span>
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>SOROBAN</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>FCE</a>
             <span className="mx-8 opacity-45">·</span>
             <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>NOIR</a>
             <span className="mx-8 opacity-45">·</span>
@@ -356,9 +294,9 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
             {/* Duplicate for infinite loop */}
             <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>LAREL</a>
             <span className="mx-8 opacity-45">·</span>
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>STELLAR</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>FLARE</a>
             <span className="mx-8 opacity-45">·</span>
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>SOROBAN</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>FCE</a>
             <span className="mx-8 opacity-45">·</span>
             <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>NOIR</a>
             <span className="mx-8 opacity-45">·</span>
@@ -381,10 +319,10 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
                     <circle cx="5" cy="6.5" r="4.5" stroke="currentColor" />
                     <circle cx="8" cy="6.5" r="4.5" stroke="currentColor" />
                   </svg>
-                  Build on Stellar
+                  Build on Flare
                 </div>
                 <p className={`text-[13px] leading-relaxed ${dark ? 'text-[#f2f2f2]/70' : 'text-[#191919]/70'}`}>
-                  Larel is a community-run project. We're always developing for everyone in the Stellar ecosystem. To get involved, reach out with what you'd build.
+                  Larel is a community-run project. We're always developing for everyone in the Flare ecosystem. To get involved, reach out with what you'd build.
                 </p>
               </div>
             </div>
