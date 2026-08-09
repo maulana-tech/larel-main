@@ -1,14 +1,13 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useLarel } from '../hooks/useLarel'
 import { useReveal } from '../hooks/useReveal'
-import { useIsDark } from '../hooks/useTheme'
+
 import { clearAllNotes } from '../lib/note-store'
 import { cx } from '../lib/cx'
 import { BrandCanvas } from './BrandCanvas'
 import { ConnectWallet } from './ConnectWallet'
 import { EyeGlyph, SettingsIcon, FaucetIcon } from './ui'
-import logoDark from '../assets/logo-dark.png'
-import logoLight from '../assets/logo-light.png'
+import larelLogo from '../assets/larel-logo.png'
 import { ScrambleNumber } from './ScrambleNumber'
 import { ThemeToggle } from './ThemeToggle'
 import { useT, useSettings, formatMoney } from '../lib/settings'
@@ -49,9 +48,7 @@ function AppNav() {
     <header className="sticky top-0 z-40 px-4 pt-4">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 rounded-2xl bg-ink-900/75 px-5 py-2.5 shadow-[0_12px_34px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl">
         <NavLink to="/app" className="flex items-center gap-2.5">
-          {/* Light logo for light mode, dark logo for dark mode */}
-          <img src={logoLight} alt="Larel" className="h-12 w-auto dark:hidden" />
-          <img src={logoDark} alt="Larel" className="hidden h-12 grayscale w-auto dark:block" />
+          <img src={larelLogo} alt="Larel" className="h-12 w-auto object-contain" />
           <span className="font-display text-base font-semibold tracking-tight text-spectral-soft">
             larel
           </span>
@@ -116,7 +113,7 @@ function AppNav() {
 
 function AppFooter() {
   const { refreshBalances } = useLarel()
-  const dark = useIsDark()
+
   async function clearLocalData() {
     const ok = window.confirm(
       'Clear locally-cached shielded notes on this device?\n\nYour wallet stays connected — this only removes the notes/balance stored in this browser. Any on-chain funds tied to older notes stay on-chain.',
@@ -140,7 +137,7 @@ function AppFooter() {
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-5 px-8 py-8 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <NavLink to="/" className="transition hover:opacity-75 flex items-center gap-3">
-            <img src={logoDark} alt="Larel" className="h-[150px] w-auto" style={{ filter: dark ? 'brightness(0) invert(1)' : 'brightness(0)', opacity: 0.85 }} />
+            <img src={larelLogo} alt="Larel" className="h-[150px] w-auto object-contain" style={{ opacity: 0.85 }} />
             <span className="font-display text-xl font-semibold tracking-tight text-zinc-950/80 dark:text-zinc-100">
               larel
             </span>
