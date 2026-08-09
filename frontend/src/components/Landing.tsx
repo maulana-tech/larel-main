@@ -9,11 +9,7 @@ import { useIsDark } from '../hooks/useTheme'
 
 const ROTATING = ['shielded', 'unlinkable', 'verified', 'private', 'yours']
 
-/** Coordinate-label copy. Module-level so ScrambleCycle's `words` stays
- *  referentially stable across renders — an inline array would re-fire its
- *  effect every render and restart the animation. The labels settle in once
- *  (`once`) and then hold: they're fixed readouts, not a loop. Durations are
- *  staggered so the three resolve in sequence rather than snapping together. */
+
 const NET_TITLE = ['Testnet']
 const NET_VALUE = ['Flare · Coston2']
 const PROOF_TITLE = ['Proof']
@@ -26,11 +22,7 @@ const GRID_H = 'rgba(255,255,255,0.09)'
 const GRID_V_LIGHT = 'rgba(25,25,25,0.06)'
 const GRID_H_LIGHT = 'rgba(25,25,25,0.09)'
 
-/** A faint trading-chart grid behind the hero — evenly spaced vertical (time)
- *  and horizontal (price) hairlines, the horizontals a touch stronger like price
- *  levels — the same atmosphere the app surface runs, so the whole product reads
- *  as one world. Grid colour fades out on scroll via the `--grid-*` vars so it
- *  dissolves into the incoming footer. */
+
 function ChartBackground() {
   const fade = 'radial-gradient(125% 105% at 50% 46%, #000 40%, transparent 100%)'
   return (
@@ -49,9 +41,7 @@ function ChartBackground() {
   )
 }
 
-/** The coordinate readouts, now a stacked column anchored to the hero's right
- *  rail rather than scattered over the backdrop — it counterweights the
- *  left-aligned headline instead of colliding with it. Fades with the grid. */
+
 function Readouts({ dark }: { dark: boolean }) {
   const textColor = dark ? 'text-[#ffffff]/50' : 'text-[#191919]/50'
   const textHighlight = dark ? 'text-[#ffffff]/85' : 'text-[#191919]/85'
@@ -86,7 +76,6 @@ function Word({ children }: { children: string }) {
 
 export function Landing({ onEnter }: { onEnter: () => void }) {
   // Smooth section scrolling is driven by the ScrollStack's window-scroll Lenis
-  // (in StoryShielded), so no separate Lenis instance is mounted here.
   const heroRef = useRef<HTMLElement>(null)
   const dark = useIsDark()
 
@@ -127,10 +116,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
         className="relative min-h-screen w-full overflow-hidden"
         style={{ '--grid-v': dark ? GRID_V : GRID_V_LIGHT, '--grid-h': dark ? GRID_H : GRID_H_LIGHT, '--grid-op': 1 } as CSSProperties}
       >
-      {/* Backdrop — hero banner, driven fully to greyscale so it reads as the
-          same black-and-white world as the app surface rather than a standalone
-          illustration. `isolate` keeps the blend layers acting on the image
-          only, never on the page beneath. Grain is a separate static overlay. */}
+      
       <ChartBackground />
 
       {/* Header — fixed, inverts against whatever scrolls behind it. */}
@@ -154,9 +140,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
         </div>
       </header>
 
-      {/* Hero — left-aligned masthead on a 12-column rail, with the coordinate
-          readouts held on the right so the composition stays balanced instead of
-          floating dead-centre. Stacks to a single column below `lg`. */}
+      
       <div className="relative z-10 flex min-h-screen items-center">
         <div className="mx-auto grid w-full max-w-[100rem] grid-cols-1 items-center gap-14 px-6 pb-28 pt-32 sm:px-10 lg:grid-cols-12 lg:gap-10 lg:px-16 lg:pb-24">
           <div className="lg:col-span-6 xl:col-span-6">
@@ -243,11 +227,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
         </span>
       </div>
 
-      {/* Clean seam into the dark story: a long, gradual wash over the bottom
-          (grain and fluid alike) reaching the story ground #101010 at the
-          boundary so the section change is invisible. Below the z-10 content, so
-          the headline and `scroll` stay crisp; the ramp stays transparent through
-          their band. */}
+      
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[32rem]"
         style={{
