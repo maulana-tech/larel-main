@@ -631,7 +631,7 @@ export function Swap({ embedded }: { embedded?: boolean } = {}) {
                         <td className="py-3.5 pl-3 pr-5 text-right">
                           {item.txHash ? (
                             <a
-                              href={`https://stellar.expert/explorer/testnet/tx/${item.txHash}`}
+                              href={`https://coston2-explorer.flare.network/tx/${item.txHash}`}
                               target="_blank"
                               rel="noreferrer"
                               className="font-mono text-xs text-zinc-500 hover:text-spectral underline transition"
