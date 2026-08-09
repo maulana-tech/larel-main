@@ -1,7 +1,5 @@
 import { useTheme } from '../hooks/useTheme'
 
-/** Sun / moon toggle for the app header. Swaps the whole app between the light
- *  and dark "Mist" themes; the choice persists across reloads. */
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, toggle } = useTheme()
   const isDark = theme === 'dark'
