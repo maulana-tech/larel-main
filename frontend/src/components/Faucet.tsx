@@ -48,7 +48,7 @@ export function Faucet() {
 
         {!connected && (
           <p className="mt-4 rounded-xl border border-ink-700 bg-ink-900/50 px-3.5 py-3 text-center text-sm text-zinc-500">
-            Connect your Stellar wallet to mint.
+            Connect your Flare wallet to mint.
           </p>
         )}
 
