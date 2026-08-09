@@ -245,7 +245,7 @@ const BADGE_TONE: Record<BadgeTone, string> = {
   neutral: 'bg-ink-700/60 text-zinc-300',
   accent: 'bg-spectral/15 text-spectral-soft',
   success: 'bg-patina-500/15 text-patina-300',
-  warn: 'bg-amber-500/15 text-amber-300',
+  warn: 'bg-zinc-500/15 text-zinc-300',
   danger: 'bg-red-500/15 text-red-300',
 }
 
