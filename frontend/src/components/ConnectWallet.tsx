@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { FREIGHTER_INSTALL_URL, useWallet } from '../hooks/useWallet'
+import { useWallet } from '../hooks/useWallet'
 import { truncateKey } from '../lib/format'
 import { cx } from '../lib/cx'
 import { Badge, Button, ChevronDownIcon, CopyIcon } from './ui'
@@ -31,8 +31,8 @@ export function ConnectWallet() {
 
   if (wallet.status === 'not-installed') {
     return (
-      <a href={FREIGHTER_INSTALL_URL} target="_blank" rel="noreferrer" className="btn btn-outline">
-        Install Freighter
+      <a href="https://metamask.io/download/" target="_blank" rel="noreferrer" className="btn btn-outline">
+        Install MetaMask
       </a>
     )
   }
@@ -41,7 +41,7 @@ export function ConnectWallet() {
     return (
       <div className="relative" ref={menuRef}>
         <button type="button" onClick={() => setOpen((o) => !o)} className="btn btn-outline gap-2.5">
-          <span className={cx('h-2 w-2 rounded-full', wallet.isTestnet ? 'bg-patina-400' : 'bg-amber-400')} />
+          <span className={cx('h-2 w-2 rounded-full', wallet.isTestnet ? 'bg-patina-400' : 'bg-zinc-400')} />
           <span className="font-mono text-xs">{truncateKey(wallet.address)}</span>
           <ChevronDownIcon className="h-3.5 w-3.5 text-zinc-500" />
         </button>
@@ -64,7 +64,7 @@ export function ConnectWallet() {
             {copied && <p className="mt-1.5 text-xs text-patina-300">Copied to clipboard</p>}
 
             {!wallet.isTestnet && (
-              <p className="mt-2 text-xs text-amber-400">Switch Freighter to Testnet for this demo.</p>
+              <p className="mt-2 text-xs text-zinc-400">Switch Freighter to Testnet for this demo.</p>
             )}
 
             <Button
