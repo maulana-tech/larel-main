@@ -10,7 +10,7 @@
 //! Public inputs (SHARED sec 7, IN THIS ORDER):
 //!   order_commitment, refund_commitment, refund_asset_id
 
-use dep::lax_stell_lib as w;
+use dep::larel_lib as w;
 
 fn main(
     // ---- public inputs (order is load-bearing: SHARED sec 7) ----
