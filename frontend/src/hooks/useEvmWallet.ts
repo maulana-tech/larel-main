@@ -55,7 +55,7 @@ export function useEvmWallet(): EvmWalletState {
       if (injectedConnector) connect({ connector: injectedConnector })
     },
     disconnect: () => disconnect(),
-    switchToSepolia: () => switchChain({ chainId: sepolia.id }),
+    switchToSepolia: () => switchChain({ chainId: sepolia.id as any }),
     walletClient: (walletClient as WalletClient | undefined) ?? null,
     publicClient: (publicClient as PublicClient | undefined) ?? null,
   }
