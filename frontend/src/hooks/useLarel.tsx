@@ -14,7 +14,6 @@ import {
 } from '../lib/note-store'
 import { resolveShieldedIdentity } from '../lib/shielded-identity'
 import { deriveEncKeypair, encodeReceiveCode } from '../lib/note-crypto'
-import { clearIndexer, startIndexer, syncIndexer } from '../lib/indexer-service'
 import { useWallet } from './useWallet'
 
 interface LarelContextValue {
@@ -114,7 +113,6 @@ export function LarelProvider({ children }: { children: ReactNode }) {
  
       if (status !== 'connected' || !address) {
         clearActiveIdentity()
-        clearIndexer()
         setIdentityReady(false)
         setReceiveCode(null)
         setBalances([])
@@ -132,13 +130,9 @@ export function LarelProvider({ children }: { children: ReactNode }) {
         setIdentityReady(true)
         // Start the indexer (hydrates from cache), then sync from chain to rebuild the tree
         // and discover deposits/received notes/spends, then load the balance.
-        startIndexer(key)
-        const stats = await syncIndexer().catch(() => null)
-        if (cancelled) return
         await refreshBalances()
         await refreshOrders()
         await refreshHistory()
-        void stats
       } catch (err) {
         if (!cancelled) {
           console.error('Failed to derive the shielded identity', err)
@@ -157,17 +151,9 @@ export function LarelProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (USE_MOCK || !identityReady) return
     const id = setInterval(() => {
-      void syncIndexer()
-        .then((stats) => {
-          // A fill/deposit/spend can change both the balance and open orders (matched → filled,
-          // partial → residual), so refresh both when the indexer reports any change.
-          if (stats && stats.deposits + stats.received + stats.spent > 0) {
-            void refreshBalances()
-            void refreshOrders()
-            void refreshHistory()
-          }
-        })
-        .catch(() => undefined)
+      void refreshBalances()
+      void refreshOrders()
+      void refreshHistory()
     }, 15_000)
     return () => clearInterval(id)
   }, [identityReady, address, refreshBalances, refreshOrders, refreshHistory])
