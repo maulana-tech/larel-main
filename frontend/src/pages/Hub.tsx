@@ -38,7 +38,7 @@ export function Hub() {
           </button>
         </div>
 
-        <div className="mt-6 flex min-h-[4.5rem] items-center" style={{ textShadow: '0 2px 34px rgba(14,14,14,0.55)' }}>
+        <div className="mt-6 flex min-h-[4.5rem] items-center">
           {loadingBalances ? (
             <span className="display-hd text-5xl text-spectral/25">••••••</span>
           ) : (
