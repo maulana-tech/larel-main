@@ -13,8 +13,7 @@ import { useIsDark } from '../hooks/useTheme'
 
 // Light-speck film grain for the dark ground (white noise, low alpha) — matches
 // the hero's grain so the whole dark landing reads as one surface.
-const GRAIN =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.35 0.35 0.35 0 -0.36'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E\")"
+const GRAIN = ''
 
 /** The narrative beats, presented as a ScrollStack: each card pins near the
  *  top and scales/stacks under the next as you scroll. `flip` puts the loop on
@@ -55,7 +54,7 @@ const STACK = [
     label: 'proven math',
     coord: '[ UltraHonk · BN254 ]',
     title: 'the math is the lock.',
-    body: 'every move out is a zero-knowledge proof, checked on-chain inside a Soroban contract. a spend reveals only a nullifier, so the old note and the new never link. no valid proof, no funds move.',
+    body: 'every move out is a zero-knowledge proof, checked on-chain inside a Flare EVM contract. a spend reveals only a nullifier, so the old note and the new never link. no valid proof, no funds move.',
     src: cubeUrl,
     poster: cubePoster,
     flip: true,
@@ -63,7 +62,7 @@ const STACK = [
 ]
 
 const MODULES = [
-  { k: 'DEPOSIT / WITHDRAW', d: 'assets in, or in from Ethereum, BLS-verified on Soroban.', to: '/deposit' },
+  { k: 'DEPOSIT / WITHDRAW', d: 'assets in, or in from Ethereum, BLS-verified on Flare EVM.', to: '/deposit' },
   { k: 'PORTFOLIO', d: 'private multi-asset balances only you can see.', to: '/portfolio' },
   { k: 'PAY', d: 'confidential payments; amounts and parties hidden.', to: '/pay' },
   { k: 'SWAP', d: 'a zero-knowledge dark pool; orders matched blind.', to: '/swap' },
