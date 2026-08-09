@@ -3,8 +3,7 @@ import type { CSSProperties } from 'react'
 import ScrambleCycle from './ScrambleCycle'
 import { StoryShielded } from './StoryShielded'
 
-import logoDark from '../assets/logo-dark.png'
-import logoLight from '../assets/logo-light.png'
+import larelLogo from '../assets/larel-logo.png'
 import { ThemeToggle } from './ThemeToggle'
 import { useIsDark } from '../hooks/useTheme'
 
@@ -54,9 +53,9 @@ function ChartBackground() {
  *  rail rather than scattered over the backdrop — it counterweights the
  *  left-aligned headline instead of colliding with it. Fades with the grid. */
 function Readouts({ dark }: { dark: boolean }) {
-  const textColor = dark ? 'text-[#f2f2f2]/50' : 'text-[#191919]/50'
-  const textHighlight = dark ? 'text-[#f2f2f2]/85' : 'text-[#191919]/85'
-  const rule = dark ? 'border-[#f2f2f2]/12' : 'border-[#191919]/12'
+  const textColor = dark ? 'text-[#ffffff]/50' : 'text-[#191919]/50'
+  const textHighlight = dark ? 'text-[#ffffff]/85' : 'text-[#191919]/85'
+  const rule = dark ? 'border-[#ffffff]/12' : 'border-[#191919]/12'
   const rows = [
     { title: NET_TITLE, value: NET_VALUE, td: 620, vd: 900 },
     { title: PROOF_TITLE, value: PROOF_VALUE, td: 820, vd: 1150 },
@@ -64,15 +63,15 @@ function Readouts({ dark }: { dark: boolean }) {
   ]
   return (
     <ul
-      className={`flex flex-col gap-7 border-l ${rule} pl-6 font-mono text-[10px] uppercase tracking-[0.14em] ${textColor}`}
+      className={`flex flex-row flex-wrap justify-start w-full gap-x-10 gap-y-6 font-mono text-[10px] uppercase tracking-[0.14em] ${textColor}`}
       style={{ opacity: 'var(--grid-op, 1)' }}
     >
-      {rows.map((r) => (
-        <li key={r.title[0]}>
+      {rows.map((r, i) => (
+        <li key={r.title[0]} className={`flex flex-col ${i > 0 ? `border-l ${rule} pl-8` : ''}`}>
           <span className={`block ${textHighlight}`}>
             <ScrambleCycle words={r.title} duration={r.td} glitch={false} once />
           </span>
-          <span className="mt-1 block">
+          <span className="mt-1.5 block">
             [ <ScrambleCycle words={r.value} duration={r.vd} glitch={false} once /> ]
           </span>
         </li>
@@ -119,8 +118,8 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
     <div
       className="relative w-full transition-colors duration-300"
       style={{
-        backgroundColor: dark ? '#191919' : '#f2f2f2',
-        color: dark ? '#f2f2f2' : '#191919',
+        backgroundColor: dark ? '#191919' : '#ffffff',
+        color: dark ? '#ffffff' : '#191919',
       }}
     >
       <section
@@ -135,21 +134,20 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
       <ChartBackground />
 
       {/* Header — fixed, inverts against whatever scrolls behind it. */}
-      <header className="fixed inset-x-0 top-0 z-50 mix-blend-difference">
+      <header className="fixed inset-x-0 top-0 z-50">
         <div className="flex items-center justify-between px-8 py-5">
           <a href="#/" className="flex items-center gap-3">
-            {/* Dark logo (black mark) works with mix-blend-difference: inverts to white on dark bg */}
-            <img src={logoDark} alt="Larel" className="h-12 w-auto grayscale" />
-            <span className="font-display text-base font-semibold tracking-tight text-[#f2f2f2]">
+            <img src={larelLogo} alt="Larel" className="h-12 w-auto" />
+            <span className={`font-display text-base font-semibold tracking-tight ${dark ? 'text-[#ffffff]' : 'text-[#191919]'}`}>
               larel
             </span>
           </a>
           <nav className="flex items-center gap-6 font-mono text-[11px] uppercase tracking-[0.18em]">
-            <a href="#/faucet" className="text-[#f2f2f2]/70 transition hover:text-[#f2f2f2]">
+            <a href="#/faucet" className={`transition ${dark ? 'text-[#ffffff]/70 hover:text-[#ffffff]' : 'text-[#191919]/70 hover:text-[#191919]'}`}>
               Faucet
             </a>
             <ThemeToggle />
-            <button onClick={onEnter} className="text-[#f2f2f2]/70 transition hover:text-[#f2f2f2]">
+            <button onClick={onEnter} className={`transition ${dark ? 'text-[#ffffff]/70 hover:text-[#ffffff]' : 'text-[#191919]/70 hover:text-[#191919]'}`}>
               Enter →
             </button>
           </nav>
@@ -161,9 +159,9 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           floating dead-centre. Stacks to a single column below `lg`. */}
       <div className="relative z-10 flex min-h-screen items-center">
         <div className="mx-auto grid w-full max-w-[100rem] grid-cols-1 items-center gap-14 px-6 pb-28 pt-32 sm:px-10 lg:grid-cols-12 lg:gap-10 lg:px-16 lg:pb-24">
-          <div className="lg:col-span-7 xl:col-span-7">
+          <div className="lg:col-span-6 xl:col-span-6">
             <span
-              className={`block font-mono text-[10px] uppercase tracking-[0.28em] ${dark ? 'text-[#f2f2f2]/55' : 'text-[#191919]/55'}`}
+              className={`block font-mono text-[10px] uppercase tracking-[0.28em] ${dark ? 'text-[#ffffff]/55' : 'text-[#191919]/55'}`}
             >
               [ Flare · Compute Extension · zero-knowledge ]
             </span>
@@ -190,7 +188,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
             </h1>
 
             <p
-              className={`mt-8 max-w-xl text-[15px] font-medium leading-relaxed ${dark ? 'text-[#f2f2f2]/70' : 'text-[#191919]/70'}`}
+              className={`mt-8 max-w-xl text-[15px] font-medium leading-relaxed ${dark ? 'text-[#ffffff]/70' : 'text-[#191919]/70'}`}
             >
               Deposit, transfer and trade on Flare with amounts, balances and counterparties
               hidden — every move still verified on-chain by a zero-knowledge proof.
@@ -201,8 +199,8 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
                 onClick={onEnter}
                 className="inline-flex items-center gap-2 px-7 py-3.5 font-mono text-[11px] uppercase tracking-[0.18em] transition hover:opacity-80"
                 style={{
-                  backgroundColor: dark ? '#f2f2f2' : '#191919',
-                  color: dark ? '#101010' : '#f2f2f2',
+                  backgroundColor: dark ? '#ffffff' : '#191919',
+                  color: dark ? '#101010' : '#ffffff',
                 }}
               >
                 Enter app →
@@ -211,23 +209,35 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
                 href="#/faucet"
                 className={`inline-flex items-center gap-2 border px-7 py-3.5 font-mono text-[11px] uppercase tracking-[0.18em] transition ${
                   dark
-                    ? 'border-[#f2f2f2]/25 text-[#f2f2f2]/80 hover:border-[#f2f2f2]/60 hover:text-[#f2f2f2]'
+                    ? 'border-[#ffffff]/25 text-[#ffffff]/80 hover:border-[#ffffff]/60 hover:text-[#ffffff]'
                     : 'border-[#191919]/25 text-[#191919]/80 hover:border-[#191919]/60 hover:text-[#191919]'
                 }`}
               >
                 Get testnet funds
               </a>
             </div>
+            <div className="mt-16 w-full opacity-80 pt-6 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
+              <Readouts dark={dark} />
+            </div>
           </div>
 
-          <div className="lg:col-span-4 lg:col-start-9 lg:flex lg:justify-end">
-            <Readouts dark={dark} />
+          <div className="lg:col-span-6 lg:col-start-7 lg:flex lg:flex-col lg:justify-center gap-10 relative z-20 mt-10 lg:mt-0">
+            <div className="relative w-full overflow-hidden rounded-2xl">
+              <video 
+                src="/video.webm" 
+                autoPlay 
+                loop 
+                muted 
+                playsInline 
+                className="w-full h-auto block transform scale-110"
+              />
+            </div>
           </div>
         </div>
 
         {/* Scroll cue — pinned bottom-left, on the same rail as the headline. */}
         <span
-          className={`absolute bottom-10 left-6 font-mono text-[11px] uppercase tracking-[0.3em] sm:left-10 lg:left-16 ${dark ? 'text-[#f2f2f2]/55' : 'text-[#191919]/55'}`}
+          className={`absolute bottom-10 left-6 font-mono text-[11px] uppercase tracking-[0.3em] sm:left-10 lg:left-16 ${dark ? 'text-[#ffffff]/55' : 'text-[#191919]/55'}`}
         >
           scroll ↓
         </span>
@@ -243,7 +253,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
         style={{
           background: dark
             ? 'linear-gradient(to bottom, rgba(16,16,16,0) 0%, rgba(16,16,16,0) 48%, rgba(16,16,16,0.35) 70%, rgba(16,16,16,0.72) 86%, rgba(16,16,16,0.92) 94%, #101010 100%)'
-            : 'linear-gradient(to bottom, rgba(242,242,242,0) 0%, rgba(242,242,242,0) 48%, rgba(242,242,242,0.35) 70%, rgba(242,242,242,0.72) 86%, rgba(242,242,242,0.92) 94%, #f2f2f2 100%)',
+            : 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 48%, rgba(255,255,255,0.35) 70%, rgba(255,255,255,0.72) 86%, rgba(255,255,255,0.92) 94%, #ffffff 100%)',
         }}
       />
       </section>
@@ -252,18 +262,18 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
 
       <footer className="relative flex min-h-screen flex-col justify-between overflow-hidden px-8 py-16 transition-colors duration-300"
               style={{
-                backgroundColor: dark ? '#101010' : '#f2f2f2',
-                color: dark ? '#f2f2f2' : '#191919',
+                backgroundColor: dark ? '#101010' : '#ffffff',
+                color: dark ? '#ffffff' : '#191919',
               }}
       >
 
 
         <div className="relative flex items-start justify-between">
-          <p className={`max-w-xs text-[15px] font-medium leading-snug ${dark ? 'text-[#f2f2f2]/80' : 'text-[#191919]/80'}`}>
+          <p className={`max-w-xs text-[15px] font-medium leading-snug ${dark ? 'text-[#ffffff]/80' : 'text-[#191919]/80'}`}>
             Feel free to reach out if you want private money on Flare — or simply have a chat.
           </p>
           <a href="#/" className="transition hover:opacity-75">
-            <img src={dark ? logoDark : logoLight} alt="Larel" className="h-36 w-auto opacity-85 grayscale" />
+            <img src={larelLogo} alt="Larel" className="h-36 w-auto opacity-85" />
           </a>
         </div>
 
@@ -281,47 +291,47 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
 
         <div className="relative overflow-hidden w-full whitespace-nowrap select-none">
           <div className="animate-lax-marquee" style={{ fontSize: 'clamp(2rem, 8.2vw, 6.5rem)', color: dark ? '#a6a6a6' : '#7a7a7a' }}>
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>LAREL</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}>LAREL</a>
             <span className="mx-8 opacity-45">·</span>
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>FLARE</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}>FLARE</a>
             <span className="mx-8 opacity-45">·</span>
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>FCE</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}>FCE</a>
             <span className="mx-8 opacity-45">·</span>
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>NOIR</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}>NOIR</a>
             <span className="mx-8 opacity-45">·</span>
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>SHIELDED</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}>SHIELDED</a>
             <span className="mx-8 opacity-45">·</span>
             {/* Duplicate for infinite loop */}
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>LAREL</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}>LAREL</a>
             <span className="mx-8 opacity-45">·</span>
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>FLARE</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}>FLARE</a>
             <span className="mx-8 opacity-45">·</span>
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>FCE</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}>FCE</a>
             <span className="mx-8 opacity-45">·</span>
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>NOIR</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}>NOIR</a>
             <span className="mx-8 opacity-45">·</span>
-            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>SHIELDED</a>
+            <a href="/" className={`transition-colors ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}>SHIELDED</a>
             <span className="mx-8 opacity-45">·</span>
           </div>
-          <div className="mt-6 h-px w-full" style={{ backgroundColor: dark ? 'rgba(242,242,242,0.2)' : 'rgba(25,25,25,0.2)' }} />
+          <div className="mt-6 h-px w-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.2)' : 'rgba(25,25,25,0.2)' }} />
         </div>
 
         <div className="relative">
           <div className="flex flex-col gap-12 md:flex-row md:items-end md:justify-between">
-            <nav className={`flex gap-6 font-mono text-[13px] uppercase tracking-[0.14em] ${dark ? 'text-[#f2f2f2]/70' : 'text-[#191919]/70'}`}>
-              <a href="https://github.com/ln-tc999/Larel.git" className={`transition ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}>GitHub</a>
+            <nav className={`flex gap-6 font-mono text-[13px] uppercase tracking-[0.14em] ${dark ? 'text-[#ffffff]/70' : 'text-[#191919]/70'}`}>
+              <a href="https://github.com/ln-tc999/Larel.git" className={`transition ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}>GitHub</a>
             </nav>
 
             <div className="flex justify-end">
               <div className="max-w-[20rem] text-right">
-                <div className={`mb-4 flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.16em] justify-end ${dark ? 'text-[#f2f2f2]' : 'text-[#191919]'}`}>
+                <div className={`mb-4 flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.16em] justify-end ${dark ? 'text-[#ffffff]' : 'text-[#191919]'}`}>
                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden>
                     <circle cx="5" cy="6.5" r="4.5" stroke="currentColor" />
                     <circle cx="8" cy="6.5" r="4.5" stroke="currentColor" />
                   </svg>
                   Build on Flare
                 </div>
-                <p className={`text-[13px] leading-relaxed ${dark ? 'text-[#f2f2f2]/70' : 'text-[#191919]/70'}`}>
+                <p className={`text-[13px] leading-relaxed ${dark ? 'text-[#ffffff]/70' : 'text-[#191919]/70'}`}>
                   Larel is a community-run project. We're always developing for everyone in the Flare ecosystem. To get involved, reach out with what you'd build.
                 </p>
               </div>
@@ -330,14 +340,14 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
 
           <div className="mt-14 flex items-center justify-between border-t pt-6 font-mono text-[11px] uppercase tracking-[0.14em]"
                style={{
-                 borderColor: dark ? 'rgba(242,242,242,0.12)' : 'rgba(25,25,25,0.12)',
-                 color: dark ? 'rgba(242,242,242,0.5)' : 'rgba(25,25,25,0.5)',
+                 borderColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(25,25,25,0.12)',
+                 color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(25,25,25,0.5)',
                }}
           >
             <span>© Larel Team 2026</span>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className={`transition ${dark ? 'hover:text-[#f2f2f2]' : 'hover:text-[#191919]'}`}
+              className={`transition ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}
             >
               Top ↑
             </button>
