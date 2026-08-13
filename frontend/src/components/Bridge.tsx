@@ -361,7 +361,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
   const from: Endpoint = direction === 'deposit' ? l1 : 'larel'
   const to: Endpoint = direction === 'deposit' ? 'larel' : l1
 
-  const ethToken = BRIDGE_TOKENS.ETH
+  const ethToken = CURATED_TOKENS.find(t => t.code === 'ETH')!
 
   // Deposit-from-Stellar token: any curated token (with a SAC here) or a custom SAC address.
   const [depositToken, setDepositToken] = useState<TokenMeta>(() => depositableTokens()[0] ?? CURATED_TOKENS[0]!)
@@ -468,11 +468,11 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
   const creditBridgeNote = useCallback(
     async (note: ReturnType<typeof createBridgeNote>) => {
       if (!ethToken) return
-      if (USE_MOCK) await sdk.deposit({ asset: ethToken.assetCode, amount })
-      else addNote(note, { assetCode: ethToken.assetCode })
+      if (USE_MOCK) await sdk.deposit({ asset: ethToken.code, amount })
+      else addNote(note, { assetCode: ethToken.code })
       await refreshBalances()
     },
-    [sdk, ethToken?.assetCode, amount, refreshBalances],
+    [sdk, ethToken?.code, amount, refreshBalances],
   )
 
   // --- deposit / withdraw flows --------------------------------------------
