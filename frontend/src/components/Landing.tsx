@@ -213,7 +213,9 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
                 loop 
                 muted 
                 playsInline 
-                className="w-full h-auto block transform scale-110"
+                className={`w-full h-auto block transform scale-110 ${
+                  dark ? 'invert mix-blend-screen opacity-90' : 'mix-blend-multiply'
+                }`}
               />
             </div>
           </div>
