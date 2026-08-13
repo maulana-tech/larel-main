@@ -1,5 +1,6 @@
 import type { FC, SVGProps } from 'react'
 import { cx } from '../lib/cx'
+import larelLogo from '../assets/larel-logo.png'
 
 /**
  * Monochrome brand marks for chains and tokens.
@@ -61,7 +62,7 @@ export function XrpGlyph(props: SVGProps<SVGSVGElement>) {
 export function LarelSpinnerMark(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 200 200" aria-hidden {...props}>
-      <image href="/larel-logo.png" width="200" height="200" preserveAspectRatio="xMidYMid meet" />
+      <image href={larelLogo} width="200" height="200" preserveAspectRatio="xMidYMid meet" />
     </svg>
   )
 }
@@ -69,7 +70,7 @@ export function LarelSpinnerMark(props: SVGProps<SVGSVGElement>) {
 export function LarelMark(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 200 200" aria-hidden {...props}>
-      <image href="/larel-logo.png" width="200" height="200" preserveAspectRatio="xMidYMid meet" />
+      <image href={larelLogo} width="200" height="200" preserveAspectRatio="xMidYMid meet" />
     </svg>
   )
 }
