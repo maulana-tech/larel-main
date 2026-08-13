@@ -104,22 +104,22 @@ function OrderTableSkeleton() {
             <div className="h-5 w-10 animate-pulse rounded-full bg-ink-700" />
           </td>
           <td className="py-3.5 px-3">
-            <div className="h-3.5 w-20 animate-pulse rounded bg-ink-700" />
+            <div className="h-3.5 w-20 animate-pulse rounded-none bg-ink-700" />
           </td>
           <td className="py-3.5 px-3">
-            <div className="ml-auto h-3.5 w-14 animate-pulse rounded bg-ink-700" />
+            <div className="ml-auto h-3.5 w-14 animate-pulse rounded-none bg-ink-700" />
           </td>
           <td className="py-3.5 px-3">
-            <div className="ml-auto h-3.5 w-14 animate-pulse rounded bg-ink-700" />
+            <div className="ml-auto h-3.5 w-14 animate-pulse rounded-none bg-ink-700" />
           </td>
           <td className="py-3.5 px-3">
             <div className="ml-auto h-3 w-20 animate-pulse rounded-full bg-ink-800" />
           </td>
           <td className="py-3.5 px-3">
-            <div className="ml-auto h-3 w-12 animate-pulse rounded bg-ink-800" />
+            <div className="ml-auto h-3 w-12 animate-pulse rounded-none bg-ink-800" />
           </td>
           <td className="py-3.5 pl-3 pr-5">
-            <div className="ml-auto h-7 w-14 animate-pulse rounded-lg bg-ink-800" />
+            <div className="ml-auto h-7 w-14 animate-pulse rounded-none bg-ink-800" />
           </td>
         </tr>
       ))}
@@ -270,7 +270,7 @@ export function Swap({ embedded }: { embedded?: boolean } = {}) {
                     <span className="text-xs text-zinc-500">{quote}</span>
                     <span
                       className={cx(
-                        'rounded px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em]',
+                        'rounded-none px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em]',
                         livePrice
                           ? 'bg-spectral/10 text-spectral/80'
                           : 'bg-ink-800 text-zinc-600',
@@ -280,7 +280,7 @@ export function Swap({ embedded }: { embedded?: boolean } = {}) {
                     </span>
                   </div>
                 ) : (
-                  <div className="h-4 w-24 animate-pulse rounded bg-ink-700" />
+                  <div className="h-4 w-24 animate-pulse rounded-none bg-ink-700" />
                 )}
 
                 {/* Hide chart button */}
@@ -288,7 +288,7 @@ export function Swap({ embedded }: { embedded?: boolean } = {}) {
                   type="button"
                   onClick={() => setShowChart(false)}
                   aria-label="Hide chart"
-                  className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg text-zinc-600 transition hover:bg-ink-800 hover:text-zinc-300"
+                  className="ml-auto flex h-7 w-7 items-center justify-center rounded-none text-zinc-600 transition hover:bg-ink-800 hover:text-zinc-300"
                 >
                   <XIcon className="h-3.5 w-3.5" />
                 </button>
@@ -305,7 +305,7 @@ export function Swap({ embedded }: { embedded?: boolean } = {}) {
               type="button"
               onClick={() => setShowChart(true)}
               aria-label="Show chart"
-              className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-2xl border border-ink-700 bg-ink-900/40 py-4 transition hover:border-spectral/40"
+              className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-none border border-ink-700 bg-ink-900/40 py-4 transition hover:border-spectral/40"
             >
               <ChartIcon className="h-4 w-4 shrink-0 text-spectral/70" />
               <span className="whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500 rotate-180 [writing-mode:vertical-rl]">
@@ -438,7 +438,7 @@ export function Swap({ embedded }: { embedded?: boolean } = {}) {
               </Field>
 
               {/* Estimated total — styled as an inset info row */}
-              <div className="flex items-center justify-between rounded-xl border border-ink-700/50 bg-ink-900/50 px-4 py-3">
+              <div className="flex items-center justify-between rounded-none border border-ink-700/50 bg-ink-900/50 px-4 py-3">
                 <span className="text-xs text-zinc-500">
                   Est. {side === 'buy' ? 'cost' : 'proceeds'}
                 </span>
@@ -497,7 +497,7 @@ export function Swap({ embedded }: { embedded?: boolean } = {}) {
             type="button"
             onClick={() => setOrdersOpen((v) => !v)}
             aria-label={ordersOpen ? 'Collapse panel' : 'Expand panel'}
-            className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg text-zinc-600 transition hover:bg-ink-800 hover:text-zinc-300"
+            className="ml-auto flex h-7 w-7 items-center justify-center rounded-none text-zinc-600 transition hover:bg-ink-800 hover:text-zinc-300"
           >
             <ChevronDownIcon
               className={cx(
@@ -606,7 +606,7 @@ export function Swap({ embedded }: { embedded?: boolean } = {}) {
                       <tr key={item.id} className="border-b border-ink-800 last:border-0 hover:bg-ink-800/25 transition-colors">
                         <td className="py-3.5 pl-5 pr-3 text-left">
                           <span className={cx(
-                            "rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider",
+                            "rounded-none px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider",
                             item.type === 'Swap' && "bg-blue-500/10 text-blue-400",
                             item.type === 'Deposit' && "bg-green-500/10 text-green-400",
                             item.type === 'Withdrawal' && "bg-yellow-500/10 text-yellow-400",

@@ -206,7 +206,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           </div>
 
           <div className="lg:col-span-6 lg:col-start-7 lg:flex lg:flex-col lg:justify-center gap-10 relative z-20 mt-10 lg:mt-0">
-            <div className="relative w-full overflow-hidden rounded-2xl">
+            <div className="relative w-full overflow-hidden rounded-none">
               <video 
                 src="/video.webm" 
                 autoPlay 

@@ -39,7 +39,7 @@ export function Faucet() {
         <ConnectWallet />
       </header>
 
-      <section className="rounded-2xl border border-ink-700 bg-ink-850/70 p-6 shadow-panel">
+      <section className="rounded-none border border-ink-700 bg-ink-850/70 p-6 shadow-panel">
         <h1 className="text-lg font-semibold tracking-tight text-zinc-100">Testnet faucet</h1>
         <p className="mt-1 text-sm text-zinc-400">
           Mint mock tokens to your connected wallet, then deposit them into the shielded pool. These
@@ -47,7 +47,7 @@ export function Faucet() {
         </p>
 
         {!connected && (
-          <p className="mt-4 rounded-xl border border-ink-700 bg-ink-900/50 px-3.5 py-3 text-center text-sm text-zinc-500">
+          <p className="mt-4 rounded-none border border-ink-700 bg-ink-900/50 px-3.5 py-3 text-center text-sm text-zinc-500">
             Connect your Flare wallet to mint.
           </p>
         )}
@@ -56,7 +56,7 @@ export function Faucet() {
           {FAUCET_TOKENS.map((t) => (
             <div
               key={t.code}
-              className="flex items-center gap-3 rounded-2xl border border-ink-800 bg-ink-900/40 p-3"
+              className="flex items-center gap-3 rounded-none border border-ink-800 bg-ink-900/40 p-3"
             >
               <CoinBadge name={t.icon} size="lg" />
               <div className="min-w-0">

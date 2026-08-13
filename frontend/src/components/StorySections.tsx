@@ -73,7 +73,7 @@ export function BentoSection() {
             owner live inside the hash, only the root is ever public, and old notes never link to new
             ones.
           </p>
-          <code className="mt-6 block w-fit rounded-lg px-3 py-2 font-mono text-[11px] text-[#7a7a7a] dark:text-[#bfbfbf]" style={{ background: dark ? 'rgba(242,242,242,0.06)' : 'rgba(25,25,25,0.05)' }}>
+          <code className="mt-6 block w-fit rounded-none px-3 py-2 font-mono text-[11px] text-[#7a7a7a] dark:text-[#bfbfbf]" style={{ background: dark ? 'rgba(242,242,242,0.06)' : 'rgba(25,25,25,0.05)' }}>
             commitment = hash4(asset, amount, owner, blinding)
           </code>
         </Tile>
@@ -86,9 +86,9 @@ export function BentoSection() {
             BN254. no amounts, no addresses leave the circuit.
           </p>
           <div className="mt-5 flex flex-wrap gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-[#7a7a7a] dark:text-[#858585]">
-            <span className="rounded-md px-2.5 py-1 text-[#7a7a7a] dark:text-[#bfbfbf]" style={{ background: dark ? 'rgba(242,242,242,0.06)' : 'rgba(25,25,25,0.05)' }}>14,592 B proof</span>
-            <span className="rounded-md px-2.5 py-1 text-[#7a7a7a] dark:text-[#bfbfbf]" style={{ background: dark ? 'rgba(242,242,242,0.06)' : 'rgba(25,25,25,0.05)' }}>1,760 B vk</span>
-            <span className="rounded-md px-2.5 py-1" style={{ background: dark ? 'rgba(242,242,242,0.06)' : 'rgba(25,25,25,0.05)' }}>keccak transcript</span>
+            <span className="rounded-none px-2.5 py-1 text-[#7a7a7a] dark:text-[#bfbfbf]" style={{ background: dark ? 'rgba(242,242,242,0.06)' : 'rgba(25,25,25,0.05)' }}>14,592 B proof</span>
+            <span className="rounded-none px-2.5 py-1 text-[#7a7a7a] dark:text-[#bfbfbf]" style={{ background: dark ? 'rgba(242,242,242,0.06)' : 'rgba(25,25,25,0.05)' }}>1,760 B vk</span>
+            <span className="rounded-none px-2.5 py-1" style={{ background: dark ? 'rgba(242,242,242,0.06)' : 'rgba(25,25,25,0.05)' }}>keccak transcript</span>
           </div>
         </Tile>
 
@@ -156,7 +156,7 @@ function Layer({
         {items.map((it) => (
           <span
             key={it}
-            className="rounded-md px-2 py-1 font-mono text-[10px] tracking-[0.03em] text-[#555555] dark:text-[#c4c4c4]"
+            className="rounded-none px-2 py-1 font-mono text-[10px] tracking-[0.03em] text-[#555555] dark:text-[#c4c4c4]"
             style={{ background: dark ? 'rgba(242,242,242,0.06)' : 'rgba(25,25,25,0.05)' }}
           >
             {it}

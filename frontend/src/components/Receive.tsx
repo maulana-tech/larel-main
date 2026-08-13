@@ -18,7 +18,7 @@ export function Receive({ receiveCode }: { receiveCode: string | null }) {
   }
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-center rounded-2xl border border-ink-700 bg-ink-900/40 p-8">
+      <div className="flex items-center justify-center rounded-none border border-ink-700 bg-ink-900/40 p-8">
         <img src={larelLogo} alt="Larel" className="h-20 w-auto" />
       </div>
       {receiveCode ? (
@@ -26,7 +26,7 @@ export function Receive({ receiveCode }: { receiveCode: string | null }) {
           <button
             type="button"
             onClick={copy}
-            className="flex w-full items-center gap-2 rounded-xl border border-ink-700 bg-ink-900/60 px-4 py-4 text-left transition hover:border-spectral/40"
+            className="flex w-full items-center gap-2 rounded-none border border-ink-700 bg-ink-900/60 px-4 py-4 text-left transition hover:border-spectral/40"
           >
             <span className="break-all font-mono text-sm text-zinc-200">{receiveCode}</span>
             <CopyIcon className="ml-auto h-4 w-4 shrink-0 text-zinc-500" />
@@ -34,7 +34,7 @@ export function Receive({ receiveCode }: { receiveCode: string | null }) {
           {copied && <p className="text-center text-xs text-patina-300">Copied to clipboard</p>}
         </>
       ) : (
-        <p className="rounded-xl border border-ink-700 bg-ink-900/50 px-4 py-4 text-center text-sm text-zinc-500">
+        <p className="rounded-none border border-ink-700 bg-ink-900/50 px-4 py-4 text-center text-sm text-zinc-500">
           Connect your Stellar wallet to reveal your receive code.
         </p>
       )}

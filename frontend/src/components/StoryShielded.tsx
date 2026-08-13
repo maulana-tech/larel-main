@@ -141,7 +141,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
             {STACK.map((s) => (
               <ScrollStackItem
                 key={s.n}
-                itemClassName={`flex min-h-[72vh] items-center rounded-[1.75rem] border px-6 py-12 sm:px-14 sm:py-16 transition-colors duration-300 ${
+                itemClassName={`flex min-h-[72vh] items-center rounded-none-[1.75rem] border px-6 py-12 sm:px-14 sm:py-16 transition-colors duration-300 ${
                   dark
                     ? 'border-[#f2f2f2]/10 bg-[#1c1c1c] shadow-[0_30px_80px_-32px_rgba(0,0,0,0.6)]'
                     : 'border-[#191919]/10 bg-[#f7f7f7] shadow-[0_30px_80px_-32px_rgba(25,25,25,0.15)]'

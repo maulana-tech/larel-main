@@ -283,7 +283,7 @@ function ChainSelect({
         <ChevronDownIcon className="h-3.5 w-3.5 text-zinc-500" />
       </button>
       {open && (
-        <div className="absolute right-0 z-40 mt-2 w-48 rounded-xl border border-ink-700 bg-ink-850 p-1 shadow-panel animate-fade-in">
+        <div className="absolute right-0 z-40 mt-2 w-48 rounded-none border border-ink-700 bg-ink-850 p-1 shadow-panel animate-fade-in">
           {L1_CHAINS.map((c) => {
             const cm = ENDPOINT_META[c]
             return (
@@ -295,7 +295,7 @@ function ChainSelect({
                   setOpen(false)
                 }}
                 className={cx(
-                  'flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition',
+                  'flex w-full items-center gap-2 rounded-none px-2.5 py-2 text-left text-sm transition',
                   c === value ? 'bg-spectral/10 text-zinc-100' : 'text-zinc-300 hover:bg-ink-800',
                 )}
               >
@@ -324,7 +324,7 @@ function EndpointPanel({
   children: ReactNode
 }) {
   return (
-    <div className="rounded-2xl border border-ink-700 bg-ink-900/50 p-4">
+    <div className="rounded-none border border-ink-700 bg-ink-900/50 p-4">
       <div className="mb-3 flex items-center justify-between">
         <span className="text-xs font-medium text-zinc-400">{role}</span>
         <div className="flex items-center gap-2">
@@ -340,7 +340,7 @@ function EndpointPanel({
 /** A read-only token chip (icon + code). */
 function TokenChip({ code }: { code: string }) {
   return (
-    <span className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-ink-700 bg-ink-850 px-3 py-2 text-sm font-semibold text-zinc-100">
+    <span className="inline-flex shrink-0 items-center gap-2 rounded-none border border-ink-700 bg-ink-850 px-3 py-2 text-sm font-semibold text-zinc-100">
       <CoinBadge name={code} size="sm" />
       {code}
     </span>
@@ -708,7 +708,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
                   disabled={running}
                 />
                 {l1 === 'stellar' ? (
-                  <div className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-ink-700 bg-ink-850 px-2.5 py-2">
+                  <div className="inline-flex shrink-0 items-center gap-2 rounded-none border border-ink-700 bg-ink-850 px-2.5 py-2">
                     <CoinBadge name={customMode ? depositToken.icon : depositCode} size="sm" />
                     <select
                       className="cursor-pointer appearance-none bg-transparent text-sm font-semibold text-zinc-100 focus:outline-none"
@@ -777,7 +777,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
                 <div className="input input-mono flex-1 border-none bg-transparent px-0 text-2xl text-zinc-100">
                   {withdrawAmountHuman || '0.00'}
                 </div>
-                <div className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-ink-700 bg-ink-850 px-2.5 py-2">
+                <div className="inline-flex shrink-0 items-center gap-2 rounded-none border border-ink-700 bg-ink-850 px-2.5 py-2">
                   <CoinBadge name={selectedNote?.assetCode ?? '—'} size="sm" />
                   <select
                     className="cursor-pointer appearance-none bg-transparent text-sm font-semibold text-zinc-100 focus:outline-none"
@@ -812,7 +812,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
             onClick={flip}
             disabled={running}
             aria-label="Switch direction"
-            className="absolute -top-3 flex h-9 w-9 items-center justify-center rounded-xl border border-ink-700 bg-ink-850 text-zinc-300 transition hover:border-spectral/50 hover:text-spectral-soft disabled:opacity-50"
+            className="absolute -top-3 flex h-9 w-9 items-center justify-center rounded-none border border-ink-700 bg-ink-850 text-zinc-300 transition hover:border-spectral/50 hover:text-spectral-soft disabled:opacity-50"
           >
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
               <path d="M7 4v16m0 0 3-3m-3 3-3-3M17 20V4m0 0 3 3m-3-3-3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -842,7 +842,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
 
         {/* Config warning (Ethereum deposit, live but unconfigured) */}
         {direction === 'deposit' && l1 === 'ethereum' && !USE_MOCK_BRIDGE && !BRIDGE_CONFIGURED && (
-          <p className="mt-4 rounded-xl border border-zinc-500/20 bg-zinc-500/10 px-3.5 py-2.5 text-xs text-zinc-300">
+          <p className="mt-4 rounded-none border border-zinc-500/20 bg-zinc-500/10 px-3.5 py-2.5 text-xs text-zinc-300">
             Live bridge addresses are not configured. Set the <span className="font-mono">VITE_*</span> bridge vars, or run with{' '}
             <span className="font-mono">VITE_USE_MOCK_BRIDGE=true</span>.
           </p>
@@ -850,7 +850,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
 
         {/* Ethereum bridge-out still needs the mock (L1 unlock not wired) */}
         {withdrawGated && (
-          <p className="mt-4 rounded-xl border border-zinc-500/20 bg-zinc-500/10 px-3.5 py-2.5 text-xs text-zinc-300">
+          <p className="mt-4 rounded-none border border-zinc-500/20 bg-zinc-500/10 px-3.5 py-2.5 text-xs text-zinc-300">
             Bridge-out to Ethereum isn’t wired for the L1 unlock yet. Preview the burn → unlock flow with{' '}
             <span className="font-mono">VITE_USE_MOCK_BRIDGE=true</span>.
           </p>

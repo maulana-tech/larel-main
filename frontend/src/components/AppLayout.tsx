@@ -46,7 +46,7 @@ function AppNav() {
   const t = useT()
   return (
     <header className="sticky top-0 z-40 px-4 pt-4">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 rounded-2xl bg-ink-900/75 px-5 py-2.5 shadow-[0_12px_34px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 rounded-none bg-ink-900/75 px-5 py-2.5 shadow-[0_12px_34px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl">
         <NavLink to="/app" className="flex items-center gap-2.5">
           <img src={larelLogo} alt="Larel" className="h-12 w-auto object-contain" />
           <span className="font-display text-base font-semibold tracking-tight text-spectral-soft">
@@ -79,7 +79,7 @@ function AppNav() {
             aria-label={t('nav.faucet')}
             className={({ isActive }) =>
               cx(
-                'inline-flex h-8 w-8 items-center justify-center rounded-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-spectral/40',
+                'inline-flex h-8 w-8 items-center justify-center rounded-none transition focus:outline-none focus-visible:ring-2 focus-visible:ring-spectral/40',
                 isActive
                   ? 'bg-zinc-200/50 text-zinc-950 dark:bg-ink-800 dark:text-spectral-soft'
                   : 'text-zinc-500 hover:bg-zinc-200/50 hover:text-zinc-950 dark:text-spectral/60 dark:hover:bg-ink-800 dark:hover:text-spectral-soft',
@@ -95,7 +95,7 @@ function AppNav() {
             aria-label={t('nav.settings')}
             className={({ isActive }) =>
               cx(
-                'inline-flex h-8 w-8 items-center justify-center rounded-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-spectral/40',
+                'inline-flex h-8 w-8 items-center justify-center rounded-none transition focus:outline-none focus-visible:ring-2 focus-visible:ring-spectral/40',
                 isActive
                   ? 'bg-zinc-200/50 text-zinc-950 dark:bg-ink-800 dark:text-spectral-soft'
                   : 'text-zinc-500 hover:bg-zinc-200/50 hover:text-zinc-950 dark:text-spectral/60 dark:hover:bg-ink-800 dark:hover:text-spectral-soft',

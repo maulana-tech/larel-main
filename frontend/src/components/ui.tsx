@@ -311,7 +311,7 @@ export function ToggleGroup<T extends string>({
   options: ToggleOption<T>[]
 }) {
   return (
-    <div className="grid grid-cols-2 gap-1 rounded-xl border border-ink-700 bg-ink-900/60 p-1">
+    <div className="grid grid-cols-2 gap-1 rounded-none border border-ink-700 bg-ink-900/60 p-1">
       {options.map((option) => {
         const active = value === option.value
         return (
@@ -320,7 +320,7 @@ export function ToggleGroup<T extends string>({
             type="button"
             onClick={() => onChange(option.value)}
             className={cx(
-              'rounded-lg py-2 text-sm font-semibold transition',
+              'rounded-none py-2 text-sm font-semibold transition',
               active
                 ? (option.activeClassName ??
                     'bg-spectral/15 text-zinc-100 shadow-[inset_0_0_0_1px_rgba(214,192,131,0.4)]')
@@ -348,7 +348,7 @@ export function TxBanner({
 }) {
   if (status === 'done' && hash) {
     return (
-      <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3.5 py-2.5 text-sm text-emerald-300 animate-fade-in">
+      <div className="flex items-center gap-2 rounded-none border border-emerald-500/20 bg-emerald-500/10 px-3.5 py-2.5 text-sm text-emerald-300 animate-fade-in">
         <CheckIcon className="h-4 w-4 shrink-0" />
         <span>{successLabel}</span>
         <span className="ml-auto font-mono text-xs text-emerald-400/70">{truncateKey(hash, 6, 6)}</span>
@@ -357,7 +357,7 @@ export function TxBanner({
   }
   if (status === 'error') {
     return (
-      <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-300 animate-fade-in">
+      <div className="rounded-none border border-red-500/20 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-300 animate-fade-in">
         {error ?? 'Transaction failed.'}
       </div>
     )
