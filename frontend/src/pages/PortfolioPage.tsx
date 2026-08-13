@@ -52,31 +52,44 @@ export function PortfolioPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 pb-20 pt-12">
       {/* Total */}
-      <header className="mb-8">
-        <div className="coord-label">portfolio · shielded</div>
-        <div className="mt-2 flex items-center gap-3">
+      <header className="mb-10 flex flex-col items-center border-b border-spectral/10 pb-10 text-center">
+        <div className="coord-label mb-4 tracking-widest text-zinc-400">total shielded balance</div>
+        <div className="flex items-center gap-4">
           {loadingBalances ? (
-            <span className="display-hd text-4xl text-spectral/25">{MASK}</span>
+            <span className="display-hd text-5xl text-spectral/25">{MASK}</span>
           ) : (
             <ScrambleNumber
               value={formatMoney(total, currency, locale)}
               revealed={revealed}
-              className="display-hd text-[clamp(2rem,6vw,3.4rem)]"
+              className="display-hd text-[clamp(2.5rem,8vw,4rem)] tracking-tight text-spectral"
             />
           )}
           <button
             type="button"
             onClick={toggle}
             aria-label={revealed ? 'Hide balances' : 'Show balances'}
-            className="text-spectral/50 transition hover:text-spectral"
+            className="mt-2 text-spectral/40 transition hover:text-spectral"
           >
-            <EyeGlyph off={!revealed} className="h-5 w-5" />
+            <EyeGlyph off={!revealed} className="h-6 w-6" />
           </button>
         </div>
-        <div className="coord-label mt-1">
-          {revealed ? `total shielded value · ${currency.toUpperCase()}` : 'private by default'}
+        <div className="coord-label mt-4 text-[10px] text-zinc-500">
+          {revealed ? `Value in ${currency.toUpperCase()}` : 'Private by default'}
         </div>
       </header>
+
+      {/* Quick Actions */}
+      <div className="mb-10 flex gap-3 sm:gap-4">
+        <Link to="/deposit" className="group flex-1 rounded-none border border-spectral/10 bg-ink-900/40 py-4 text-center backdrop-blur-sm transition hover:border-spectral/40 hover:bg-spectral/[0.02]">
+          <span className="coord-label text-spectral-soft transition group-hover:text-spectral">Bridge</span>
+        </Link>
+        <Link to="/pay" className="group flex-1 rounded-none border border-spectral/10 bg-ink-900/40 py-4 text-center backdrop-blur-sm transition hover:border-spectral/40 hover:bg-spectral/[0.02]">
+          <span className="coord-label text-spectral-soft transition group-hover:text-spectral">Transfer</span>
+        </Link>
+        <Link to="/swap" className="group flex-1 rounded-none border border-spectral/10 bg-ink-900/40 py-4 text-center backdrop-blur-sm transition hover:border-spectral/40 hover:bg-spectral/[0.02]">
+          <span className="coord-label text-spectral-soft transition group-hover:text-spectral">Trade</span>
+        </Link>
+      </div>
 
       {/* Holdings */}
       {loadingBalances ? (
@@ -104,39 +117,39 @@ export function PortfolioPage() {
                   type="button"
                   onClick={() => setOpen(isOpen ? null : b.asset)}
                   aria-expanded={isOpen}
-                  className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-spectral/[0.03]"
+                  className="flex w-full items-center gap-4 p-5 text-left transition hover:bg-spectral/[0.04]"
                 >
-                  <AssetAvatar code={b.asset} className="h-10 w-10" />
+                  <AssetAvatar code={b.asset} className="h-11 w-11" />
                   <div className="min-w-0">
-                    <div className="font-display text-sm font-semibold text-spectral-soft">{b.asset}</div>
-                    <div className="truncate text-xs text-zinc-500">
+                    <div className="font-display text-base font-semibold text-spectral-soft">{b.asset}</div>
+                    <div className="truncate text-xs text-zinc-500 mt-0.5">
                       {meta.name} · {notes.length} note{notes.length === 1 ? '' : 's'}
                     </div>
                   </div>
                   <div className="ml-auto text-right">
-                    <div className="font-mono text-sm tabular-nums text-spectral-soft">{revealed ? b.amount : MASK}</div>
-                    <div className="text-xs text-zinc-500">{revealed ? `≈ ${formatUsd(b.usdEstimate)}` : ''}</div>
+                    <div className="font-mono text-base tabular-nums text-spectral-soft">{revealed ? b.amount : MASK}</div>
+                    <div className="text-xs text-zinc-500 mt-0.5">{revealed ? `≈ ${formatUsd(b.usdEstimate)}` : ''}</div>
                   </div>
                   <ChevronDownIcon
-                    className={cx('h-4 w-4 shrink-0 text-zinc-500 transition-transform', isOpen && 'rotate-180')}
+                    className={cx('ml-2 h-4 w-4 shrink-0 text-zinc-500 transition-transform', isOpen && 'rotate-180')}
                   />
                 </button>
 
                 {isOpen && (
-                  <div className="border-t border-spectral/8 px-4 py-3">
-                    <div className="coord-label mb-2">notes</div>
+                  <div className="border-t border-spectral/10 bg-black/20 px-5 py-4">
+                    <div className="coord-label mb-3 text-zinc-500">UTXO Notes Breakdown</div>
                     {notes.length === 0 ? (
                       <p className="text-xs text-zinc-500">No spendable notes.</p>
                     ) : (
-                      <ul className="space-y-1.5">
+                      <ul className="space-y-2">
                         {notes.map((n) => (
-                          <li key={n.commitment} className="flex items-center gap-3 text-xs">
-                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-spectral/50" />
-                            <span className="text-zinc-400">{SOURCE_LABEL[n.source ?? 'received']}</span>
+                          <li key={n.commitment} className="flex items-center gap-3 text-xs rounded border border-spectral/5 bg-ink-900/20 px-3 py-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-spectral/40" />
+                            <span className="w-16 font-medium text-zinc-400">{SOURCE_LABEL[n.source ?? 'received']}</span>
                             {n.leafIndex !== undefined && (
-                              <span className="font-mono text-[11px] text-zinc-600">#{n.leafIndex}</span>
+                              <span className="font-mono text-[10px] text-zinc-600 bg-black/30 px-1.5 py-0.5 rounded">#{n.leafIndex}</span>
                             )}
-                            <span className="ml-auto font-mono tabular-nums text-zinc-200">
+                            <span className="ml-auto font-mono tabular-nums text-zinc-300">
                               {revealed ? `${formatAmount(noteHuman(n))} ${n.assetCode}` : MASK}
                             </span>
                           </li>
