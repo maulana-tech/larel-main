@@ -8,14 +8,31 @@ import { CoinBadge } from '../components/BrandIcons'
 import { EyeGlyph } from '../components/ui'
 import { useSettings, formatMoney } from '../lib/settings'
 
+import asset1 from '../../assets/assets-01.webp'
+import asset2 from '../../assets/assets-02.webp'
+import asset3 from '../../assets/assets-03.webp'
+import asset4 from '../../assets/assets-04.webp'
+
 const MASK = '######'
 
-const MODULES = [
-  ['Deposit / Withdraw', '/deposit', 'Cross the veil', 'Move value in and out of the shielded pool proven, not trusted.'],
-  ['Pay', '/pay', 'Send into the dark', 'A 2-in / 2-out shielded transfer. Amounts and parties stay hidden.'],
-  ['Swap', '/swap', 'The sealed book', 'A dark pool where orders match at the midpoint,  nothing to front-run.'],
-  ['Receive', '/receive', 'Your cipher', 'Share your receive code to be paid privately.'],
-] as const
+type ModuleDef = {
+  label: string
+  to: string
+  title: string
+  desc: string
+  asset?: string
+}
+
+const MODULES: ModuleDef[] = [
+  { label: 'Deposit / Withdraw', to: '/deposit', title: 'Cross the veil', desc: 'Move value in and out of the shielded pool proven, not trusted.' },
+  { label: 'Pay', to: '/pay', title: 'Send into the dark', desc: 'A 2-in / 2-out shielded transfer. Amounts and parties stay hidden.' },
+  { label: 'Swap', to: '/swap', title: 'The sealed book', desc: 'A dark pool where orders match at the midpoint,  nothing to front-run.' },
+  { label: 'Receive', to: '/receive', title: 'Your cipher', desc: 'Share your receive code to be paid privately.' },
+  { label: 'Portfolio', to: '/portfolio', title: 'Shielded Balances', desc: 'View your private asset allocations and values.', asset: asset1 },
+  { label: 'Settings', to: '/settings', title: 'Preferences', desc: 'Manage your local shielded identity.', asset: asset2 },
+  { label: 'Faucet', to: '/faucet', title: 'Testnet Tokens', desc: 'Mint mock tokens for testing.', asset: asset3 },
+  { label: 'Explore', to: '/', title: 'Flare Network', desc: 'Learn more about the underlying Flare ecosystem.', asset: asset4 },
+]
 
 export function Hub() {
   const { balances, loadingBalances } = useLarel()
@@ -80,16 +97,24 @@ export function Hub() {
       </section>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {MODULES.map(([label, to, title, desc]) => (
+        {MODULES.map(({ label, to, title, desc, asset }) => (
           <Link
             key={to}
             to={to}
-            className="group rounded-none border border-spectral/10 bg-ink-900/40 p-6 backdrop-blur-sm transition hover:border-spectral/40"
+            className="group relative overflow-hidden rounded-none border border-spectral/10 bg-ink-900/40 p-6 backdrop-blur-sm transition hover:border-spectral/40 flex flex-col"
           >
-            <div className="coord-label mb-2">{label}</div>
-            <h3 className="display-hd text-xl text-spectral-soft">{title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-zinc-400">{desc}</p>
-            <span className="coord-label mt-4 inline-block text-spectral/70 transition group-hover:text-spectral">enter →</span>
+            {asset && (
+              <div className="absolute inset-0 -z-10 bg-black">
+                <img src={asset} alt="" className="h-full w-full object-cover opacity-30 transition duration-500 group-hover:opacity-50" />
+                <div className="absolute inset-0 bg-gradient-to-t from-ink-900/90 to-transparent"></div>
+              </div>
+            )}
+            <div className="relative z-10 flex flex-1 flex-col">
+              <div className="coord-label mb-2">{label}</div>
+              <h3 className="display-hd text-xl text-spectral-soft">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-400">{desc}</p>
+              <span className="coord-label mt-auto pt-4 inline-block text-spectral/70 transition group-hover:text-spectral">enter →</span>
+            </div>
           </Link>
         ))}
       </div>
