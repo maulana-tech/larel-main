@@ -20,14 +20,14 @@ type GridItem =
   | { type: 'asset'; src: string }
 
 const GRID_ITEMS: GridItem[] = [
-  { type: 'module', label: 'Deposit / Withdraw', to: '/deposit', title: 'Cross the veil', desc: 'Move value in and out of the shielded pool proven, not trusted.' },
+  { type: 'module', label: 'Bridge', to: '/deposit', title: 'Cross the Veil', desc: 'Seamlessly transfer your assets between the public ledger and your private shielded balance.' },
   { type: 'asset', src: asset1 },
   { type: 'asset', src: asset2 },
-  { type: 'module', label: 'Pay', to: '/pay', title: 'Send into the dark', desc: 'A 2-in / 2-out shielded transfer. Amounts and parties stay hidden.' },
-  { type: 'module', label: 'Swap', to: '/swap', title: 'The sealed book', desc: 'A dark pool where orders match at the midpoint,  nothing to front-run.' },
+  { type: 'module', label: 'Transfer', to: '/pay', title: 'Send into the Dark', desc: 'Execute zero-knowledge payments. Both the sender and the amount remain mathematically hidden.' },
+  { type: 'module', label: 'Trade', to: '/swap', title: 'The Sealed Book', desc: 'Access the confidential matching engine. Trade assets peer-to-peer with zero MEV exposure.' },
   { type: 'asset', src: asset3 },
   { type: 'asset', src: asset4 },
-  { type: 'module', label: 'Receive', to: '/receive', title: 'Your cipher', desc: 'Share your receive code to be paid privately.' },
+  { type: 'module', label: 'Receive', to: '/receive', title: 'Your Cipher', desc: 'Generate a stealth address to accept payments without ever exposing your main identity.' },
 ]
 
 export function Hub() {
