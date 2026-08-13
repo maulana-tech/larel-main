@@ -42,7 +42,7 @@ export function Faucet() {
   return (
     <div className="mx-auto w-full max-w-[460px] px-4 py-6">
       <header className="mb-6 flex items-center justify-between">
-        <a href="#/app" className="text-sm text-zinc-400 transition hover:text-zinc-200">
+        <a href="/app" className="text-sm text-zinc-400 transition hover:text-zinc-200">
           ← Wallet
         </a>
         <ConnectWallet />

@@ -122,14 +122,14 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
       {/* Header — fixed, inverts against whatever scrolls behind it. */}
       <header className="fixed inset-x-0 top-0 z-50">
         <div className="flex items-center justify-between px-8 py-5">
-          <a href="#/" className="flex items-center gap-3">
+          <a href="/" className="flex items-center gap-3">
             <img src={larelLogo} alt="Larel" className="h-12 w-auto" />
             <span className={`font-display text-base font-semibold tracking-tight ${dark ? 'text-[#ffffff]' : 'text-[#191919]'}`}>
               larel
             </span>
           </a>
           <nav className="flex items-center gap-6 font-mono text-[11px] uppercase tracking-[0.18em]">
-            <a href="#/faucet" className={`transition ${dark ? 'text-[#ffffff]/70 hover:text-[#ffffff]' : 'text-[#191919]/70 hover:text-[#191919]'}`}>
+            <a href="/faucet" className={`transition ${dark ? 'text-[#ffffff]/70 hover:text-[#ffffff]' : 'text-[#191919]/70 hover:text-[#191919]'}`}>
               Faucet
             </a>
             <ThemeToggle />
@@ -190,7 +190,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
                 Enter app →
               </button>
               <a
-                href="#/faucet"
+                href="/faucet"
                 className={`inline-flex items-center gap-2 border px-7 py-3.5 font-mono text-[11px] uppercase tracking-[0.18em] transition ${
                   dark
                     ? 'border-[#ffffff]/25 text-[#ffffff]/80 hover:border-[#ffffff]/60 hover:text-[#ffffff]'
@@ -254,7 +254,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           <p className={`max-w-xs text-[15px] font-medium leading-snug ${dark ? 'text-[#ffffff]/80' : 'text-[#191919]/80'}`}>
             Feel free to reach out if you want private money on Flare — or simply have a chat.
           </p>
-          <a href="#/" className="transition hover:opacity-75">
+          <a href="/" className="transition hover:opacity-75">
             <img src={larelLogo} alt="Larel" className="h-36 w-auto opacity-85" />
           </a>
         </div>

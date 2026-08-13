@@ -765,7 +765,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
               {direction === 'deposit' && l1 === 'stellar' && !customMode && depositToken.faucet && (
                 <p className="mt-2 text-xs text-zinc-500">
                   Need test {depositToken.code}? Mint some from the{' '}
-                  <a href="#/faucet" className="text-spectral-soft hover:underline">
+                  <a href="/faucet" className="text-spectral-soft hover:underline">
                     faucet
                   </a>
                   .
