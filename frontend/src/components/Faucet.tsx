@@ -7,23 +7,32 @@ import { CoinBadge } from './BrandIcons'
 import { Button } from './ui'
 import { ConnectWallet } from './ConnectWallet'
 
+import { useWalletClient, usePublicClient } from 'wagmi'
+
 const FAUCET_TOKENS = CURATED_TOKENS.filter((t) => t.faucet && t.sac)
 const DRIP = 1000
 
 /** Testnet faucet: mint mock tokens (USDC/ETH/BTC/XRP) to the connected wallet. */
 export function Faucet() {
   const wallet = useWallet()
+  const { data: walletClient } = useWalletClient()
+  const publicClient = usePublicClient()
   const [busy, setBusy] = useState<string | null>(null)
   const [msg, setMsg] = useState<Record<string, string>>({})
   const connected = wallet.status === 'connected'
 
   async function mint(code: string, sac: string, decimals: number) {
+    if (!walletClient || !publicClient) {
+      setMsg((m) => ({ ...m, [code]: 'Wallet clients not ready.' }))
+      return
+    }
     setBusy(code)
     setMsg((m) => ({ ...m, [code]: '' }))
     try {
-      const hash = await faucetMint(sac, BigInt(DRIP) * 10n ** BigInt(decimals))
+      const hash = await faucetMint(sac, BigInt(DRIP) * 10n ** BigInt(decimals), walletClient, publicClient)
       setMsg((m) => ({ ...m, [code]: `✓ Minted ${DRIP.toLocaleString()} ${code} · ${truncateKey(hash, 6, 6)}` }))
     } catch (e) {
+      console.error(e)
       setMsg((m) => ({ ...m, [code]: e instanceof Error ? e.message : 'Mint failed.' }))
     } finally {
       setBusy(null)
