@@ -544,7 +544,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
       timeoutMs: 6 * 60_000,
       signal: () => cancelledRef.current,
     })
-    if (!minted) throw new Error('Timed out waiting for the mint on Stellar. Is the relayer submitting inclusion proofs?')
+    if (!minted) throw new Error('Timed out waiting for the mint on Flare. Is the relayer submitting inclusion proofs?')
     setStep(3)
     await creditBridgeNote(note)
   }
@@ -899,7 +899,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
                   .
                 </>
               ) : l1 === 'stellar' ? (
-                <>Released to {truncateKey(recipient, 6, 6)} on Stellar.</>
+                <>Released to {truncateKey(recipient, 6, 6)} on Flare.</>
               ) : (
                 <>Released to {truncateKey(recipient, 6, 6)} on Sepolia.</>
               )}
