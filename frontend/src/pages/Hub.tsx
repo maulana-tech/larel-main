@@ -20,14 +20,14 @@ type GridItem =
   | { type: 'asset'; src: string }
 
 const GRID_ITEMS: GridItem[] = [
-  { type: 'module', label: 'Bridge', to: '/deposit', title: 'Cross the Veil', desc: 'Seamlessly transfer your assets between the public ledger and your private shielded balance.' },
+  { type: 'module', label: 'Bridge', to: '/deposit', title: 'Cross the Veil', desc: 'Bridge your assets seamlessly between the public Flare network and the Larel shielded pool. This process utilizes Zero-Knowledge proofs to ensure that your deposits and withdrawals remain completely untraceable, granting you absolute privacy.' },
   { type: 'asset', src: asset1 },
   { type: 'asset', src: asset2 },
-  { type: 'module', label: 'Transfer', to: '/pay', title: 'Send into the Dark', desc: 'Execute zero-knowledge payments. Both the sender and the amount remain mathematically hidden.' },
-  { type: 'module', label: 'Trade', to: '/swap', title: 'The Sealed Book', desc: 'Access the confidential matching engine. Trade assets peer-to-peer with zero MEV exposure.' },
+  { type: 'module', label: 'Transfer', to: '/pay', title: 'Send into the Dark', desc: 'Execute truly anonymous zero-knowledge payments to anyone on the network. Both the sender\'s identity and the exact transaction amount remain mathematically hidden from the public ledger, providing you with uncompromising financial confidentiality.' },
+  { type: 'module', label: 'Trade', to: '/swap', title: 'The Sealed Book', desc: 'Access our state-of-the-art confidential matching engine powered by Trusted Execution Environments. Trade assets peer-to-peer in a completely dark pool where your orders are matched at the exact midpoint, guaranteeing zero MEV exposure and zero slippage.' },
   { type: 'asset', src: asset3 },
   { type: 'asset', src: asset4 },
-  { type: 'module', label: 'Receive', to: '/receive', title: 'Your Cipher', desc: 'Generate a stealth address to accept payments without ever exposing your main identity.' },
+  { type: 'module', label: 'Receive', to: '/receive', title: 'Your Cipher', desc: 'Generate a single-use, cryptographically secure stealth address to accept inbound payments. Share this unique cipher with anyone to receive funds privately, without ever exposing your main identity or linking your transaction history.' },
 ]
 
 export function Hub() {
