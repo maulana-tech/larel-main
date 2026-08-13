@@ -255,7 +255,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
             Feel free to reach out if you want private money on Flare — or simply have a chat.
           </p>
           <a href="/" className="transition hover:opacity-75">
-            <img src={larelLogo} alt="Larel" className="h-36 w-auto opacity-85" />
+            <img src={larelLogo} alt="Larel" className="h-10 w-auto opacity-85" />
           </a>
         </div>
 
