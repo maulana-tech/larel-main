@@ -98,7 +98,7 @@ export function Hub() {
             return (
               <div
                 key={`asset-${i}`}
-                className="relative overflow-hidden rounded-none border border-spectral/10 bg-ink-900/40 p-6 backdrop-blur-sm min-h-[160px]"
+                className="relative overflow-hidden rounded-none border border-spectral/10 bg-ink-900/40 p-6 backdrop-blur-sm min-h-[240px]"
               >
                 <div className="absolute inset-0 bg-black">
                   <img
@@ -115,7 +115,7 @@ export function Hub() {
             <Link
               key={item.to}
               to={item.to}
-              className="group relative overflow-hidden rounded-none border border-spectral/10 bg-ink-900/40 p-6 backdrop-blur-sm transition hover:border-spectral/40 flex flex-col min-h-[160px]"
+              className="group relative overflow-hidden rounded-none border border-spectral/10 bg-ink-900/40 p-6 backdrop-blur-sm transition hover:border-spectral/40 flex flex-col min-h-[240px]"
             >
               <div className="relative z-10 flex flex-1 flex-col">
                 <div className="coord-label mb-2">{item.label}</div>
