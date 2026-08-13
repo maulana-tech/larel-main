@@ -100,11 +100,11 @@ export function Hub() {
                 key={`asset-${i}`}
                 className="relative overflow-hidden rounded-none border border-spectral/10 bg-ink-900/40 p-6 backdrop-blur-sm min-h-[480px]"
               >
-                <div className="absolute inset-0 bg-black">
+                <div className="absolute inset-0">
                   <img
                     src={item.src}
                     alt=""
-                    className="h-full w-full object-cover opacity-80"
+                    className="h-full w-full object-cover"
                   />
                 </div>
               </div>
