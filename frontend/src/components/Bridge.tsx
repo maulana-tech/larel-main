@@ -467,11 +467,12 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
 
   const creditBridgeNote = useCallback(
     async (note: ReturnType<typeof createBridgeNote>) => {
+      if (!ethToken) return
       if (USE_MOCK) await sdk.deposit({ asset: ethToken.assetCode, amount })
       else addNote(note, { assetCode: ethToken.assetCode })
       await refreshBalances()
     },
-    [sdk, ethToken.assetCode, amount, refreshBalances],
+    [sdk, ethToken?.assetCode, amount, refreshBalances],
   )
 
   // --- deposit / withdraw flows --------------------------------------------
