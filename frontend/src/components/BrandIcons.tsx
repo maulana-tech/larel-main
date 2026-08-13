@@ -1,4 +1,3 @@
-import { useId } from 'react'
 import type { FC, SVGProps } from 'react'
 import { cx } from '../lib/cx'
 
@@ -59,59 +58,18 @@ export function XrpGlyph(props: SVGProps<SVGSVGElement>) {
   )
 }
 
-/**
- * Original abstract spark mark — kept as the spinner icon so the loading
- * animation continues to work with a compact square glyph.
- */
 export function LarelSpinnerMark(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M1 3.19 1 4.34 1.33 6.2 2.31 8.88 2.99 9.94 4.03 11.01 4.98 11.6 5.89 11.93 4.19 12.73 3.19 13.7 2.44 14.77 1.77 16.21 1.35 17.58 1 19.59 1 20.68 22.89 20.63 22.54 17.58 22 15.85 21.45 14.75 19.95 12.93 19 12.31 18.06 11.95 19.19 11.47 20.06 10.85 21.54 8.95 22.53 6.38 22.87 3.19ZM11.98 4.21 12.49 7.02 13.04 8.46 13.61 9.46 14.37 10.45 15.17 11.16 16.8 11.95 15.87 12.29 14.97 12.86 13.51 14.55 12.49 16.85 12 19.66 11.36 16.72 10.27 14.37 9.01 12.93 7.99 12.27 7.06 11.96 8.86 11.05 9.52 10.47 10.29 9.46 11.36 7.15Z"
-      />
+    <svg viewBox="0 0 200 200" aria-hidden {...props}>
+      <image href="/larel-logo.png" width="200" height="200" preserveAspectRatio="xMidYMid meet" />
     </svg>
   )
 }
 
-/**
- * The Lax-Stell brand mark — a paired-arc geometric device:
- * a small reversed-D (left) interlocked with a large reversed-D + rectangle
- * (right), bisected by a horizontal hairline that reveals the background
- * so it reads correctly in both dark mode and light mode.
- *
- * Uses an SVG <mask> with a unique per-instance ID (React useId) so multiple
- * marks on the same page don't share mask definitions.
- */
 export function LarelMark(props: SVGProps<SVGSVGElement>) {
-  const uid = useId()
-  // useId may contain ":" and other chars — strip to letters/digits for a valid XML id
-  const mid = `lsm${uid.replace(/[^a-zA-Z0-9]/g, '')}`
   return (
-    <svg viewBox="0 0 200 200" fill="currentColor" aria-hidden {...props}>
-      <defs>
-        <mask id={mid}>
-          {/* White = show fill; black rect = transparent "cut" that reveals background */}
-          <rect x="0" y="0" width="200" height="200" fill="white" />
-          <rect x="16" y="97" width="139" height="6" fill="black" />
-        </mask>
-      </defs>
-      <g mask={`url(#${mid})`}>
-        {/*
-          Left shape — small reversed D:
-          flat right edge at x=68, semicircle center (68,100) radius 52.
-          Arc goes counterclockwise (sweep=0) from bottom (68,152) → left through
-          (16,100) → top (68,48), closing the flat diameter on the right.
-        */}
-        <path d="M 68 48 L 68 152 A 52 52 0 0 0 68 48 Z" />
-        {/*
-          Right shape — large reversed D + rectangle:
-          circle center (88,100) radius 72, arc counterclockwise (sweep=0) from
-          (88,28) → left through (16,100) → (88,172); rectangle closes the right.
-        */}
-        <path d="M 88 28 A 72 72 0 0 0 88 172 L 184 172 L 184 28 Z" />
-      </g>
+    <svg viewBox="0 0 200 200" aria-hidden {...props}>
+      <image href="/larel-logo.png" width="200" height="200" preserveAspectRatio="xMidYMid meet" />
     </svg>
   )
 }
