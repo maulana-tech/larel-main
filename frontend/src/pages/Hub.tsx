@@ -84,7 +84,7 @@ export function Hub() {
           <Link
             key={to}
             to={to}
-            className="group rounded-2xl border border-spectral/10 bg-ink-900/40 p-6 backdrop-blur-sm transition hover:border-spectral/40"
+            className="group rounded-none border border-spectral/10 bg-ink-900/40 p-6 backdrop-blur-sm transition hover:border-spectral/40"
           >
             <div className="coord-label mb-2">{label}</div>
             <h3 className="display-hd text-xl text-spectral-soft">{title}</h3>

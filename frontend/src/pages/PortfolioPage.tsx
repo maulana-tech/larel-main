@@ -82,11 +82,11 @@ export function PortfolioPage() {
       {loadingBalances ? (
         <div className="space-y-2">
           {[0, 1].map((i) => (
-            <div key={i} className="h-[68px] animate-pulse rounded-2xl border border-spectral/10 bg-ink-900/40" />
+            <div key={i} className="h-[68px] animate-pulse rounded-none border border-spectral/10 bg-ink-900/40" />
           ))}
         </div>
       ) : balances.length === 0 ? (
-        <div className="rounded-2xl border border-spectral/10 bg-ink-900/40 px-6 py-14 text-center">
+        <div className="rounded-none border border-spectral/10 bg-ink-900/40 px-6 py-14 text-center">
           <p className="text-sm text-zinc-400">Nothing shielded yet.</p>
           <Link to="/deposit" className="coord-label mt-3 inline-block text-spectral/70 transition hover:text-spectral">
             deposit assets →
@@ -99,7 +99,7 @@ export function PortfolioPage() {
             const isOpen = open === b.asset
             const meta = assetMeta(b.asset)
             return (
-              <div key={b.asset} className="overflow-hidden rounded-2xl border border-spectral/10 bg-ink-900/40">
+              <div key={b.asset} className="overflow-hidden rounded-none border border-spectral/10 bg-ink-900/40">
                 <button
                   type="button"
                   onClick={() => setOpen(isOpen ? null : b.asset)}
