@@ -24,7 +24,7 @@ export interface TokenMeta {
   priceUsd: number
   /** SAC address on the active network, or undefined if not available here. */
   sac?: string
-  /** True for the native XLM SAC (asset_id = 0). */
+  /** True for the native FLR SAC (asset_id = 0). */
   native?: boolean
   /** True for cross-chain bridged assets (no native SAC; minted by the bridge). */
   bridged?: boolean
@@ -38,13 +38,13 @@ function sacEnv(code: string): string | undefined {
 }
 
 /**
- * Curated tokens shown in the deposit picker. XLM is the real native SAC; USDC/ETH/BTC/XRP
+ * Curated tokens shown in the deposit picker. FLR is the real native SAC; USDC/ETH/BTC/XRP
  * are testnet faucet tokens (deployed permissionless-mint mocks) so they're depositable
  * out of the box — the app can mint them to you. Override any SAC via `VITE_<CODE>_SAC`
  * (e.g. to point at the real mainnet assets).
  */
 export const CURATED_TOKENS: TokenMeta[] = [
-  { code: 'XLM', name: 'Stellar Lumens', icon: 'XLM', decimals: 7, priceUsd: 0.39, sac: NATIVE_SAC, native: true },
+  { code: 'FLR', name: 'Flare', icon: 'FLR', decimals: 18, priceUsd: 0.03, sac: NATIVE_SAC, native: true },
   { code: 'USDC', name: 'Test USD Coin', icon: 'USDC', decimals: 7, priceUsd: 1, faucet: true,
     sac: sacEnv('USDC') ?? 'CB3TLW74NBIOT3BUWOZ3TUM6RFDF6A4GVIRUQRQZABG5KPOUL4JJOV2F' },
   { code: 'ETH', name: 'Test Ethereum', icon: 'ETH', decimals: 7, priceUsd: 3500, faucet: true,
@@ -76,7 +76,7 @@ export function assetMeta(code: string): TokenMeta {
   return REGISTRY.get(code) ?? { code, name: code, icon: code, decimals: 7, priceUsd: 0 }
 }
 
-/** The `asset_id` field for a token: native XLM = 0; else Poseidon2 of its SAC address. */
+/** The `asset_id` field for a token: native FLR = 0; else Poseidon2 of its SAC address. */
 export function assetIdFor(token: Pick<TokenMeta, 'native' | 'sac'>): Field {
   if (token.native) return NATIVE_ASSET_ID
   if (!token.sac) throw new Error('Token has no SAC address to derive its asset id.')

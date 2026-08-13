@@ -64,7 +64,7 @@ type Endpoint = L1 | 'larel'
 type Direction = 'deposit' | 'withdraw'
 
 const ENDPOINT_META: Record<Endpoint, { label: string; sub: string; icon: string }> = {
-  stellar: { label: 'Stellar', sub: 'Testnet', icon: 'stellar' },
+  stellar: { label: 'Flare', sub: 'Coston2', icon: 'flare' },
   ethereum: { label: 'Ethereum', sub: 'Sepolia', icon: 'ethereum' },
   larel: { label: 'Larel', sub: 'Shielded pool', icon: 'larel' },
 }
@@ -72,7 +72,7 @@ const ENDPOINT_META: Record<Endpoint, { label: string; sub: string; icon: string
 const L1_CHAINS: L1[] = ['stellar', 'ethereum']
 
 /** The L1-native token that enters/leaves each external chain (code = CoinBadge name). */
-const L1_TOKEN: Record<L1, string> = { stellar: 'XLM', ethereum: 'ETH' }
+const L1_TOKEN: Record<L1, string> = { stellar: 'FLR', ethereum: 'ETH' }
 
 /** Notes withdrawable back to each chain: bridged notes go to Ethereum, the rest to Stellar. */
 function isWithdrawableTo(l1: L1, code: string): boolean {
@@ -88,10 +88,10 @@ function l1TokenFor(code: string): string {
 }
 
 const STEP_LABELS: Record<string, string[]> = {
-  'deposit:stellar': ['Submit deposit on Stellar', 'Shielded note minted'],
-  'deposit:ethereum': ['Lock on Sepolia', 'Header finalized', 'Inclusion proven', 'Minted on Stellar'],
-  'withdraw:stellar': ['Prove ownership (ZK)', 'Released on Stellar'],
-  'withdraw:ethereum': ['Prove ownership', 'Burn note on Stellar', 'Unlock authorized', 'Released on Sepolia'],
+  'deposit:stellar': ['Submit deposit on Flare', 'Shielded note minted'],
+  'deposit:ethereum': ['Lock on Sepolia', 'Header finalized', 'Inclusion proven', 'Minted on Flare'],
+  'withdraw:stellar': ['Prove ownership (ZK)', 'Released on Flare'],
+  'withdraw:ethereum': ['Prove ownership', 'Burn note on Flare', 'Unlock authorized', 'Released on Sepolia'],
 }
 
 // ---------------------------------------------------------------------------
@@ -607,7 +607,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
     // Every shielded note is owned by the wallet-derived identity, so a connected
     // Stellar wallet (and its derived key) is required for both directions.
     if (!USE_MOCK && stellar.status !== 'connected')
-      return { label: 'Connect Stellar wallet', onClick: () => void stellar.connect() }
+      return { label: 'Connect wallet', onClick: () => void stellar.connect() }
     if (!USE_MOCK && !identityReady)
       return { label: 'Preparing shielded identity…', onClick: () => {}, disabled: true }
     if (direction === 'deposit') {
@@ -833,7 +833,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
             <TextInput
               mono
               className="mt-3"
-              placeholder={l1 === 'stellar' ? 'Stellar recipient · G…' : 'Ethereum recipient · 0x…'}
+              placeholder={l1 === 'stellar' ? 'Flare recipient · 0x…' : 'Ethereum recipient · 0x…'}
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
               disabled={running}
@@ -866,8 +866,8 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
         ) : (
           <p className="mt-3 text-center text-xs text-zinc-500">
             {direction === 'deposit'
-              ? 'Funds enter the shielded pool directly on Stellar Testnet.'
-              : 'Redeems a shielded note back to a classic Stellar account.'}
+              ? 'Funds enter the shielded pool directly on Coston2.'
+              : 'Redeems a shielded note back to a classic Flare account.'}
           </p>
         )}
       </Card>

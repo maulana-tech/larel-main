@@ -10,7 +10,7 @@
 import { assetMeta } from './tokens'
 
 const COINGECKO_IDS: Record<string, string> = {
-  XLM: 'stellar',
+  FLR: 'flare-network',
   USDC: 'usd-coin',
   ETH: 'ethereum',
   BTC: 'bitcoin',

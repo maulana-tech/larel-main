@@ -44,7 +44,7 @@ export const POOL_CONTRACT_ID = env(
   '0x16dCC523fa9F57C08b0D7B3AD92Ec6cE7819A6Cb',
 )
 
-/** Native (XLM) Stellar Asset Contract address. */
+/** Native (FLR) Flare Asset Contract address. */
 export const NATIVE_SAC = env(
   'VITE_NATIVE_SAC',
   'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC',
@@ -140,21 +140,21 @@ export const ETH_L1_ADDRESS = '0x0000000000000000000000000000000000000000'
 /** Sepolia test-USDC (Circle faucet token) — override via env for other deployments. */
 export const USDC_L1_ADDRESS = env('VITE_BRIDGE_USDC_L1', '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238')
 
-/** Per-asset on-chain config. `assetId` is the in-circuit field id (native XLM = 0). */
+/** Per-asset on-chain config. `assetId` is the in-circuit field id (native FLR = 0). */
 export interface AssetConfig {
   code: AssetCode
   /** Field identifier used in notes/commitments. */
   assetId: Field
   /** SAC contract address (StrKey "C…"), or undefined if not deployed on this network. */
   sac: string | undefined
-  /** On-chain fixed-point decimals (stroops for XLM = 7). */
+  /** On-chain fixed-point decimals (wei for FLR = 18). */
   decimals: number
   /** Display price estimate (USD), portfolio only. */
   priceUsd: number
 }
 
 export const ASSET_CONFIG: Record<AssetCode, AssetConfig> = {
-  XLM: { code: 'XLM', assetId: NATIVE_ASSET_ID, sac: NATIVE_SAC, decimals: 7, priceUsd: 0.39 },
+  FLR: { code: 'FLR', assetId: NATIVE_ASSET_ID, sac: NATIVE_SAC, decimals: 18, priceUsd: 0.03 },
   USDC: {
     code: 'USDC',
     // Derived from the SAC address when configured; otherwise a placeholder id.

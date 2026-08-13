@@ -12,7 +12,7 @@ export function Pay({ embedded }: { embedded?: boolean } = {}) {
   const proof = useProofFlow()
 
   const [recipientKey, setRecipientKey] = useState('')
-  const [asset, setAsset] = useState<AssetCode>('XLM')
+  const [asset, setAsset] = useState<AssetCode>('FLR')
   const [amount, setAmount] = useState('')
 
   const valid = recipientKey.trim().length >= 8 && isPositiveAmount(amount)

@@ -13,7 +13,7 @@ import { RealLarelSdk } from './real-sdk'
 /**
  * A shielded asset's display code. The protocol is asset-agnostic — any Stellar Asset
  * Contract (SAC) can be deposited — so this is an open string, not a fixed union. Well-
- * known codes (XLM, USDC, ETH, BTC, XRP, bETH, bUSDC) have curated metadata in
+ * known codes (FLR, USDC, ETH, BTC, XRP, bETH, bUSDC) have curated metadata in
  * `lib/tokens.ts`; custom tokens carry their own descriptor (see {@link DepositParams}).
  */
 export type AssetCode = string
@@ -29,7 +29,7 @@ export interface ShieldedBalance {
 
 export interface OpenOrder {
   id: string
-  /** Trading pair "BASE/QUOTE", e.g. "XLM/USDC". */
+  /** Trading pair "BASE/QUOTE", e.g. "FLR/USDC". */
   pair: string
   base: AssetCode
   quote: AssetCode
@@ -51,7 +51,7 @@ export interface TxResult {
 export interface DepositParams {
   asset: AssetCode
   amount: string
-  /** Explicit token descriptor for curated/custom assets. When omitted, XLM is assumed. */
+  /** Explicit token descriptor for curated/custom assets. When omitted, FLR is assumed. */
   sac?: string
   decimals?: number
   native?: boolean
@@ -122,7 +122,7 @@ export interface LarelSdk {
 
 // --- Mock implementation ----------------------------------------------------
 
-const PRICES: Record<AssetCode, number> = { XLM: 0.39, USDC: 1, bETH: 3500, bUSDC: 1 }
+const PRICES: Record<AssetCode, number> = { FLR: 0.03, USDC: 1, bETH: 3500, bUSDC: 1 }
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -149,13 +149,13 @@ function round2(value: number): number {
 }
 
 class MockLarelSdk implements LarelSdk {
-  private balances: Record<AssetCode, number> = { XLM: 1240.5, USDC: 3500, bETH: 0, bUSDC: 0 }
+  private balances: Record<AssetCode, number> = { FLR: 1240.5, USDC: 3500, bETH: 0, bUSDC: 0 }
 
   private orders: OpenOrder[] = [
     {
       id: 'ord_seed01',
-      pair: 'XLM/USDC',
-      base: 'XLM',
+      pair: 'FLR/USDC',
+      base: 'FLR',
       quote: 'USDC',
       side: 'buy',
       price: '0.38',
@@ -165,8 +165,8 @@ class MockLarelSdk implements LarelSdk {
     },
     {
       id: 'ord_seed02',
-      pair: 'XLM/USDC',
-      base: 'XLM',
+      pair: 'FLR/USDC',
+      base: 'FLR',
       quote: 'USDC',
       side: 'sell',
       price: '0.415',

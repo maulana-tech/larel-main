@@ -123,7 +123,7 @@ const GLYPHS: Record<string, GlyphComponent> = {
   stellar: StellarGlyph,
   ethereum: EthereumGlyph,
   'larel': LarelMark,
-  XLM: StellarGlyph,
+  FLR: StellarGlyph,
   ETH: EthereumGlyph,
   bETH: EthereumGlyph,
   USDC: UsdcGlyph,
