@@ -8,7 +8,7 @@ import { CoinBadge } from './BrandIcons'
 import { Button } from './ui'
 import { ConnectWallet } from './ConnectWallet'
 
-import { useWalletClient, usePublicClient } from 'wagmi'
+import { useWalletClient, usePublicClient, useAccount } from 'wagmi'
 
 const FAUCET_TOKENS = CURATED_TOKENS.filter((t) => t.faucet)
 const DRIP = 1000
@@ -16,15 +16,23 @@ const DRIP = 1000
 /** Testnet faucet: mint mock tokens (USDC/ETH/BTC/XRP) to the connected wallet. */
 export function Faucet() {
   const wallet = useWallet()
-  const { data: walletClient } = useWalletClient()
+  const { address, isConnected, chainId } = useAccount()
+  const { data: walletClient, isLoading: walletLoading, error: walletError } = useWalletClient()
   const publicClient = usePublicClient()
   const [busy, setBusy] = useState<string | null>(null)
   const [msg, setMsg] = useState<Record<string, string>>({})
   const connected = wallet.status === 'connected'
 
+  // Debug logging
+  console.log('[Faucet] wallet.status:', wallet.status, 'isConnected:', isConnected, 'chainId:', chainId)
+  console.log('[Faucet] walletClient:', walletClient ? 'exists' : 'null', 'loading:', walletLoading, 'error:', walletError)
+  console.log('[Faucet] publicClient:', publicClient ? 'exists' : 'null')
+
   async function mint(code: string, sac: string, decimals: number) {
     if (!walletClient || !publicClient) {
-      setMsg((m) => ({ ...m, [code]: 'Wallet not ready — connect MetaMask and try again.' }))
+      const reason = !walletClient ? 'walletClient is null' : 'publicClient is null'
+      console.error('[Faucet] Cannot mint:', reason)
+      setMsg((m) => ({ ...m, [code]: `Wallet not ready (${reason}). Try refreshing page.` }))
       return
     }
     setBusy(code)
