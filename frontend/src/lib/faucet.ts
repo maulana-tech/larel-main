@@ -14,8 +14,6 @@ export async function faucetMint(
   }
   
   const toAddress = walletClient.account.address
-  console.log('[Faucet] Minting to address:', toAddress)
-  console.log('[Faucet] Token:', tokenAddress, 'Amount:', amount.toString())
   
   const hash = await walletClient.writeContract({
     address: tokenAddress as `0x${string}`,
@@ -26,7 +24,6 @@ export async function faucetMint(
     account: walletClient.account,
   })
   
-  console.log('[Faucet] TX hash:', hash)
   await publicClient.waitForTransactionReceipt({ hash })
   return hash
 }
