@@ -17,9 +17,9 @@ const DRIP = 1000
 /** Testnet faucet: mint mock tokens (USDC/ETH/BTC/XRP) to the connected wallet. */
 export function Faucet() {
   const wallet = useWallet()
-  const { isConnected, chainId } = useAccount()
+  const { chainId } = useAccount()
   const { switchChain } = useSwitchChain()
-  const { data: walletClient, isLoading: walletLoading, error: walletError } = useWalletClient()
+  const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient()
   const [busy, setBusy] = useState<string | null>(null)
   const [msg, setMsg] = useState<Record<string, string>>({})
