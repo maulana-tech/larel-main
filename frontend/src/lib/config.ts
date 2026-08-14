@@ -44,16 +44,16 @@ export const POOL_CONTRACT_ID = env(
 // ---------------------------------------------------------------------------
 
 /** Mock USDC ERC20 on Coston2 (7 decimals). */
-export const MOCK_USDC_ADDRESS = env('VITE_USDC_SAC', '0x450FB6d0f985F23c1E0F03a0c5848B7dc7Fec187')
+export const MOCK_USDC_ADDRESS = env('VITE_USDC_SAC', '0x072F9Fd7Aa8F8EA6664fD77F7e264CDeC4052F74')
 
 /** Mock ETH ERC20 on Coston2 (7 decimals). */
-export const MOCK_ETH_ADDRESS = env('VITE_ETH_SAC', '0xc5D56f02c1DaE4f13b2A6a00C2ef3C8E63f4B6F6')
+export const MOCK_ETH_ADDRESS = env('VITE_ETH_SAC', '0x017ACB212AE11De96fEF8bbd6F52E677eDF040bd')
 
 /** Mock BTC ERC20 on Coston2 (7 decimals). */
-export const MOCK_BTC_ADDRESS = env('VITE_BTC_SAC', '0xE67A87b2eCBbE03B90cac2cA3C494a3e1be5f615')
+export const MOCK_BTC_ADDRESS = env('VITE_BTC_SAC', '0xF84B7457B9d8Eb4ACfbc875225514A04105a70D7')
 
 /** Mock XRP ERC20 on Coston2 (7 decimals). */
-export const MOCK_XRP_ADDRESS = env('VITE_XRP_SAC', '0xaCB12755134900196F8eE4Ae5223e6955B8Aa7Af')
+export const MOCK_XRP_ADDRESS = env('VITE_XRP_SAC', '0xb1340025b940bA91B400D8b111D728c19FcF779b')
 
 /** Whether all mock ERC20 tokens are deployed and configured. */
 export const MOCK_TOKENS_DEPLOYED = Boolean(MOCK_USDC_ADDRESS) && Boolean(MOCK_ETH_ADDRESS)
