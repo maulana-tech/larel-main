@@ -8,7 +8,8 @@ import { CoinBadge } from './BrandIcons'
 import { Button } from './ui'
 import { ConnectWallet } from './ConnectWallet'
 
-import { useWalletClient, usePublicClient, useAccount } from 'wagmi'
+import { useWalletClient, usePublicClient, useAccount, useSwitchChain } from 'wagmi'
+import { flareTestnet } from 'wagmi/chains'
 
 const FAUCET_TOKENS = CURATED_TOKENS.filter((t) => t.faucet)
 const DRIP = 1000
@@ -17,22 +18,17 @@ const DRIP = 1000
 export function Faucet() {
   const wallet = useWallet()
   const { isConnected, chainId } = useAccount()
+  const { switchChain } = useSwitchChain()
   const { data: walletClient, isLoading: walletLoading, error: walletError } = useWalletClient()
   const publicClient = usePublicClient()
   const [busy, setBusy] = useState<string | null>(null)
   const [msg, setMsg] = useState<Record<string, string>>({})
   const connected = wallet.status === 'connected'
-
-  // Debug logging
-  console.log('[Faucet] wallet.status:', wallet.status, 'isConnected:', isConnected, 'chainId:', chainId)
-  console.log('[Faucet] walletClient:', walletClient ? 'exists' : 'null', 'loading:', walletLoading, 'error:', walletError)
-  console.log('[Faucet] publicClient:', publicClient ? 'exists' : 'null')
+  const onCoston2 = chainId === flareTestnet.id
 
   async function mint(code: string, sac: string, decimals: number) {
     if (!walletClient || !publicClient) {
-      const reason = !walletClient ? 'walletClient is null' : 'publicClient is null'
-      console.error('[Faucet] Cannot mint:', reason)
-      setMsg((m) => ({ ...m, [code]: `Wallet not ready (${reason}). Try refreshing page.` }))
+      setMsg((m) => ({ ...m, [code]: 'Switch MetaMask to Flare Coston2 first.' }))
       return
     }
     setBusy(code)
@@ -74,6 +70,21 @@ export function Faucet() {
           <p className="mt-4 rounded-none border border-ink-700 bg-ink-900/50 px-3.5 py-3 text-center text-sm text-zinc-500">
             Connect your Flare wallet to mint.
           </p>
+        )}
+
+        {connected && !onCoston2 && (
+          <div className="mt-4 rounded-none border border-yellow-500/30 bg-yellow-500/10 px-3.5 py-3">
+            <p className="text-xs text-yellow-300 mb-2">
+              MetaMask is on chain {chainId}. Switch to Flare Coston2 (Chain 114) to mint tokens.
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => switchChain({ chainId: flareTestnet.id })}
+            >
+              Switch to Coston2
+            </Button>
+          </div>
         )}
 
         {connected && !MOCK_TOKENS_DEPLOYED && !USE_MOCK && (
