@@ -59,14 +59,35 @@ import { assetIdFor, assetMeta } from './tokens'
 import { formatAmount } from './format'
 import { erc20Abi, parseAbi } from 'viem'
 
-// UniswapV2Router02 ABI (SparkDEX uses this interface)
-const uniswapV2RouterAbi = parseAbi([
-  'function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)',
-  'function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable returns (uint[] memory amounts)',
-  'function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)',
-  'function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)',
-  'function WETH() external pure returns (address)',
+// SimpleAMM contract addresses on Coston2
+const AMM_POOLS: Record<string, string> = {
+  'FLR/USDC': '0x6BdB65a29aB0aA63Ed9ab1c6EC238Cd455cbdB2c',
+  'FLR/ETH': '0x8Ff8Ba795085540cC7021c5eb58CF4971eb3940E',
+  'FLR/BTC': '0xC5F9Be31f97EA13729a832F1fc41797D41C89aD1',
+  'FLR/XRP': '0xD0aCae33a7c4eB3b2A3Ce1bb3f2fc489e6B40B8e',
+  'USDC/ETH': '0x8A28b7F3448f75789c9D6ff5f0E5DdC59C744e98',
+}
+
+// SimpleAMM ABI
+const simpleAMMAbi = parseAbi([
+  'function swap(address tokenIn, uint256 amountIn, uint256 minAmountOut) external payable returns (uint256 amountOut)',
+  'function getAmountOut(address tokenIn, uint256 amountIn) external view returns (uint256)',
+  'function getReserves() external view returns (uint256, uint256)',
 ])
+
+// Get AMM pool address for a token pair
+function getAMMPool(tokenIn: string, tokenOut: string): string | undefined {
+  const key1 = `${tokenIn}/${tokenOut}`
+  const key2 = `${tokenOut}/${tokenIn}`
+  return AMM_POOLS[key1] || AMM_POOLS[key2]
+}
+
+// Get token address for AMM (native FLR = address(0))
+function getAMMTokenAddress(code: string): string {
+  if (code === 'FLR') return '0x0000000000000000000000000000000000000000'
+  const meta = assetMeta(code)
+  return meta.sac || '0x0000000000000000000000000000000000000000'
+}
 
 // Parse decimal to base units
 export function toBaseUnits(input: string, decimals: number): bigint {
