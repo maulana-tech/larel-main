@@ -65,7 +65,7 @@ export function SettingsPage() {
                     'rounded-none border py-2.5 text-xs font-semibold uppercase tracking-wider transition font-mono',
                     locale === l.code
                       ? 'border-patina-400 bg-patina-400/10 text-spectral-soft'
-                      : 'border-spectral/12 bg-ink-950/20 text-spectral/60 hover:border-spectral/40 hover:text-spectral-soft',
+                      : 'border-spectral/12 bg-ink-950/20 text-spectral/60 hover:border-red-500 hover:text-spectral-soft',
                   )}
                 >
                   {l.label}
@@ -89,7 +89,7 @@ export function SettingsPage() {
                     'rounded-none border py-2.5 text-xs font-semibold uppercase tracking-wider transition font-mono',
                     currency === c.code
                       ? 'border-patina-400 bg-patina-400/10 text-spectral-soft'
-                      : 'border-spectral/12 bg-ink-950/20 text-spectral/60 hover:border-spectral/40 hover:text-spectral-soft',
+                      : 'border-spectral/12 bg-ink-950/20 text-spectral/60 hover:border-red-500 hover:text-spectral-soft',
                   )}
                 >
                   {c.label}
@@ -116,7 +116,7 @@ export function SettingsPage() {
                     'flex-1 rounded-none border py-2.5 text-xs font-semibold uppercase tracking-wider transition font-mono',
                     theme === tCode
                       ? 'border-patina-400 bg-patina-400/10 text-spectral-soft'
-                      : 'border-spectral/12 bg-ink-950/20 text-spectral/60 hover:border-spectral/40 hover:text-spectral-soft',
+                      : 'border-spectral/12 bg-ink-950/20 text-spectral/60 hover:border-red-500 hover:text-spectral-soft',
                   )}
                 >
                   {tCode === 'light' ? t('settings.themeLight') : t('settings.themeDark')}

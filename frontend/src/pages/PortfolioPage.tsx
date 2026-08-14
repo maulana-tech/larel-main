@@ -80,13 +80,13 @@ export function PortfolioPage() {
 
       {/* Quick Actions */}
       <div className="mb-10 flex gap-3 sm:gap-4">
-        <Link to="/deposit" className="group flex-1 rounded-none border border-spectral/10 bg-ink-900/40 py-4 text-center backdrop-blur-sm transition hover:border-spectral/40 hover:bg-spectral/[0.02]">
+        <Link to="/deposit" className="group flex-1 rounded-none border border-spectral/10 bg-ink-900/40 py-4 text-center backdrop-blur-sm transition hover:border-red-500 hover:bg-spectral/[0.02]">
           <span className="coord-label text-spectral-soft transition group-hover:text-spectral">Bridge</span>
         </Link>
-        <Link to="/pay" className="group flex-1 rounded-none border border-spectral/10 bg-ink-900/40 py-4 text-center backdrop-blur-sm transition hover:border-spectral/40 hover:bg-spectral/[0.02]">
+        <Link to="/pay" className="group flex-1 rounded-none border border-spectral/10 bg-ink-900/40 py-4 text-center backdrop-blur-sm transition hover:border-red-500 hover:bg-spectral/[0.02]">
           <span className="coord-label text-spectral-soft transition group-hover:text-spectral">Transfer</span>
         </Link>
-        <Link to="/swap" className="group flex-1 rounded-none border border-spectral/10 bg-ink-900/40 py-4 text-center backdrop-blur-sm transition hover:border-spectral/40 hover:bg-spectral/[0.02]">
+        <Link to="/swap" className="group flex-1 rounded-none border border-spectral/10 bg-ink-900/40 py-4 text-center backdrop-blur-sm transition hover:border-red-500 hover:bg-spectral/[0.02]">
           <span className="coord-label text-spectral-soft transition group-hover:text-spectral">Trade</span>
         </Link>
       </div>

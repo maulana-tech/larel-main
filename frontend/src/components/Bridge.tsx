@@ -276,7 +276,7 @@ function ChainSelect({
         type="button"
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 rounded-full border border-ink-700 bg-ink-850 px-2 py-1 text-sm font-medium text-zinc-200 transition hover:border-spectral/40 disabled:opacity-60"
+        className="flex items-center gap-2 rounded-full border border-ink-700 bg-ink-850 px-2 py-1 text-sm font-medium text-zinc-200 transition hover:border-red-500 disabled:opacity-60"
       >
         <CoinBadge name={m.icon} size="sm" />
         {m.label}
@@ -813,7 +813,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
             onClick={flip}
             disabled={running}
             aria-label="Switch direction"
-            className="absolute -top-3 flex h-9 w-9 items-center justify-center rounded-none border border-ink-700 bg-ink-850 text-zinc-300 transition hover:border-spectral/50 hover:text-spectral-soft disabled:opacity-50"
+            className="absolute -top-3 flex h-9 w-9 items-center justify-center rounded-none border border-ink-700 bg-ink-850 text-zinc-300 transition hover:border-red-500 hover:text-spectral-soft disabled:opacity-50"
           >
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
               <path d="M7 4v16m0 0 3-3m-3 3-3-3M17 20V4m0 0 3 3m-3-3-3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
