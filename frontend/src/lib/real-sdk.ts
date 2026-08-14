@@ -7,7 +7,7 @@ import { wagmiConfig } from './wagmi'
 // @ts-nocheck
 import { POOL_CONTRACT_ID } from './config'
 // @ts-nocheck
-import { getSpendingKey, addNote, loadNotes, markSpent, addOrder, loadOrders, setOrderStatus } from './note-store'
+import { getSpendingKey, addNote, loadNotes, markSpent, addOrder, loadOrders, setOrderStatus, loadHistory, addHistoryItem } from './note-store'
 import type {
   DepositParams,
   OpenOrder,
@@ -116,6 +116,17 @@ export class RealLarelSdk implements LarelSdk {
     const { hash } = await this.submitOp(operation)
     
     addNote(note, { assetCode: params.asset, txHash: hash, decimals, source: 'deposit' })
+    
+    // Add to history
+    addHistoryItem({
+      id: 'dep_' + Date.now(),
+      type: 'Deposit',
+      pairOrAsset: params.asset,
+      amountIn: `${formatAmount(Number(params.amount))} ${params.asset}`,
+      txHash: hash,
+      createdAt: Date.now(),
+    })
+    
     return { hash }
   }
 
@@ -149,6 +160,17 @@ export class RealLarelSdk implements LarelSdk {
 
     const { hash } = await this.submitOp(operation)
     markSpent(candidate.commitment)
+    
+    // Add to history
+    addHistoryItem({
+      id: 'wd_' + Date.now(),
+      type: 'Withdrawal',
+      pairOrAsset: candidate.assetCode,
+      amountOut: `${formatAmount(baseUnitsToNumber(BigInt(candidate.amount), candidate.decimals ?? 18))} ${candidate.assetCode}`,
+      txHash: hash,
+      createdAt: Date.now(),
+    })
+    
     return { hash }
   }
 
@@ -267,8 +289,20 @@ export class RealLarelSdk implements LarelSdk {
       })
     }
     
+    const hash = '0x' + outputNote.commitment.toString(16).slice(0, 64)
+    
+    // Add to history
+    addHistoryItem({
+      id: 'swap_' + Date.now(),
+      type: 'Swap',
+      pairOrAsset: `${params.assetIn}/${params.assetOut}`,
+      amountIn: `${params.amountIn} ${params.assetIn}`,
+      amountOut: `${params.amountOutMin} ${params.assetOut}`,
+      createdAt: Date.now(),
+    })
+    
     console.log('[RealLarelSdk] swap completed')
-    return { hash: '0x' + outputNote.commitment.toString(16).slice(0, 64) }
+    return { hash }
   }
 
   async getShieldedBalances(): Promise<ShieldedBalance[]> {
@@ -300,10 +334,21 @@ export class RealLarelSdk implements LarelSdk {
   }
 
   async getOpenOrders(): Promise<OpenOrder[]> {
-    return []
+    const orders = loadOrders()
+    return orders.filter(o => o.status === 'open').map(o => ({
+      id: o.commitment,
+      pair: `${o.baseCode}/${o.quoteCode}`,
+      base: o.baseCode,
+      quote: o.quoteCode,
+      side: o.side === 0 ? 'buy' as const : 'sell' as const,
+      price: o.price,
+      amount: o.amount,
+      filled: '0',
+      createdAt: o.createdAt,
+    }))
   }
 
   async getTransactionHistory(): Promise<HistoryItem[]> {
-    return []
+    return loadHistory()
   }
 }
