@@ -293,7 +293,6 @@ let singleton: LarelSdk | null = null
 export function createLarelSdk(): LarelSdk {
   if (!singleton) {
     const useMock = import.meta.env.VITE_USE_MOCK === 'true'
-    console.log(`[Larel SDK] Creating ${useMock ? 'MockLarelSdk' : 'RealLarelSdk'} (VITE_USE_MOCK=${import.meta.env.VITE_USE_MOCK})`)
     singleton = useMock ? new MockLarelSdk() : new RealLarelSdk()
   }
   return singleton
