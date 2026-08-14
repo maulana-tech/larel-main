@@ -2,62 +2,67 @@
 /**
  * Token registry.
  *
- * The protocol is asset-agnostic: the pool accepts any Stellar Asset Contract (SAC) and
- * derives the note's `asset_id` from its address (native XLM = 0). So "supporting a token"
- * is purely a client concern — know its SAC, derive the asset id, done. No whitelist, no
- * contract change.
+ * The protocol is asset-agnostic: the pool accepts any ERC20 token address and
+ * derives the note's `asset_id` from its address (native ETH = 0). So "supporting a token"
+ * is purely a client concern — know its address, derive the asset id, done.
  *
- * This module holds a curated list of well-known tokens (metadata + SAC where available on
- * the active network) and resolves arbitrary custom tokens from a pasted SAC address.
+ * This module holds a curated list of well-known tokens (metadata + ERC20 address where
+ * available on the active network) and resolves arbitrary custom tokens from a pasted
+ * contract address.
  */
 import { NATIVE_ASSET_ID, toField, type Field } from '@larel/sdk'
-import { NATIVE_SAC } from './config'
+import {
+  MOCK_USDC_ADDRESS,
+  MOCK_ETH_ADDRESS,
+  MOCK_BTC_ADDRESS,
+  MOCK_XRP_ADDRESS,
+} from './config'
 
 export interface TokenMeta {
   code: string
   name: string
   /** CoinBadge icon key. */
   icon: string
-  /** On-chain fixed-point decimals (classic Stellar assets are all 7). */
+  /** On-chain fixed-point decimals. */
   decimals: number
   /** Display price estimate (USD). */
   priceUsd: number
-  /** SAC address on the active network, or undefined if not available here. */
+  /** ERC20 contract address on Coston2, or undefined if not available here. */
   sac?: string
-  /** True for the native FLR SAC (asset_id = 0). */
+  /** True for the native FLR (asset_id = 0). */
   native?: boolean
-  /** True for cross-chain bridged assets (no native SAC; minted by the bridge). */
+  /** True for cross-chain bridged assets (no native ERC20; minted by the bridge). */
   bridged?: boolean
   /** True for a testnet faucet token — the app can mint it to you on demand. */
   faucet?: boolean
 }
 
-function sacEnv(code: string): string | undefined {
-  const v = import.meta.env[`VITE_${code}_SAC` as keyof ImportMetaEnv] as string | undefined
-  return v && v.length > 0 ? v : undefined
-}
-
 /**
- * Curated tokens shown in the deposit picker. FLR is the real native SAC; USDC/ETH/BTC/XRP
- * are testnet faucet tokens (deployed permissionless-mint mocks) so they're depositable
- * out of the box — the app can mint them to you. Override any SAC via `VITE_<CODE>_SAC`
- * (e.g. to point at the real mainnet assets).
+ * Curated tokens shown in the deposit picker. FLR is native; USDC/ETH/BTC/XRP
+ * are testnet faucet tokens (deployed permissionless-mint MockERC20 mocks) so they're
+ * depositable out of the box — the app can mint them to you. Override any address via
+ * `VITE_<CODE>_SAC` (e.g. to point at the real mainnet assets).
+ *
+ * IMPORTANT: These must be EVM contract addresses (0x...) on Flare Coston2.
+ * Deploy mock tokens: cd contracts && forge script script/Deploy.s.sol --broadcast
  */
 export const CURATED_TOKENS: TokenMeta[] = [
-  { code: 'FLR', name: 'Flare', icon: 'FLR', decimals: 18, priceUsd: 0.03, sac: NATIVE_SAC, native: true },
+  { code: 'FLR', name: 'Flare', icon: 'FLR', decimals: 18, priceUsd: 0.03, native: true },
   { code: 'USDC', name: 'Test USD Coin', icon: 'USDC', decimals: 7, priceUsd: 1, faucet: true,
-    sac: sacEnv('USDC') ?? 'CB3TLW74NBIOT3BUWOZ3TUM6RFDF6A4GVIRUQRQZABG5KPOUL4JJOV2F' },
+    sac: MOCK_USDC_ADDRESS || undefined },
   { code: 'ETH', name: 'Test Ethereum', icon: 'ETH', decimals: 7, priceUsd: 3500, faucet: true,
-    sac: sacEnv('ETH') ?? 'CCBJOP22H3SY3YYHT2PLTP6RDMM2P4B3JL7KVBVGQ57IQTPXMSS6MO2L' },
+    sac: MOCK_ETH_ADDRESS || undefined },
   { code: 'BTC', name: 'Test Bitcoin', icon: 'BTC', decimals: 7, priceUsd: 65000, faucet: true,
-    sac: sacEnv('BTC') ?? 'CAVFI65WX6J4MUL7763UKWJMLJN7I2GCT2EXK4VV4HRYMDEL5B5WDFP4' },
+    sac: MOCK_BTC_ADDRESS || undefined },
   { code: 'XRP', name: 'Test XRP', icon: 'XRP', decimals: 7, priceUsd: 0.6, faucet: true,
-    sac: sacEnv('XRP') ?? 'CCZV2PCLVCSFXIDOGE5N2TBC67CW3Y6JSTUIX5HKB4IU6C3O7KESB3IA' },
+    sac: MOCK_XRP_ADDRESS || undefined },
 ]
 
 export const BRIDGED_TOKENS: TokenMeta[] = [
   { code: 'bETH', name: 'Bridged ETH', icon: 'bETH', decimals: 18, priceUsd: 3500, bridged: true },
   { code: 'bUSDC', name: 'Bridged USDC', icon: 'bUSDC', decimals: 6, priceUsd: 1, bridged: true },
+  { code: 'bBTC', name: 'Bridged BTC', icon: 'bBTC', decimals: 8, priceUsd: 65000, bridged: true },
+  { code: 'bXRP', name: 'Bridged XRP', icon: 'bXRP', decimals: 6, priceUsd: 0.6, bridged: true },
 ]
 
 const REGISTRY = new Map<string, TokenMeta>([...CURATED_TOKENS, ...BRIDGED_TOKENS].map((t) => [t.code, t]))
@@ -78,24 +83,23 @@ export function assetMeta(code: string): TokenMeta {
   return REGISTRY.get(code) ?? { code, name: code, icon: code, decimals: 7, priceUsd: 0 }
 }
 
-/** The `asset_id` field for a token: native FLR = 0; else Poseidon2 of its SAC address. */
+/** The `asset_id` field for a token: native FLR = 0; else Poseidon2 of its ERC20 address. */
 export function assetIdFor(token: Pick<TokenMeta, 'native' | 'sac'>): Field {
   if (token.native) return NATIVE_ASSET_ID
-  if (!token.sac) throw new Error('Token has no SAC address to derive its asset id.')
+  if (!token.sac) throw new Error('Token has no ERC20 address to derive its asset id.')
   return toField(BigInt(token.sac))
 }
 
-/** Curated tokens depositable on the active network (their SAC exists here). */
+/** Curated tokens depositable on the active network (their ERC20 address exists here). */
 export function depositableTokens(): TokenMeta[] {
-  return CURATED_TOKENS.filter((t) => Boolean(t.sac))
+  return CURATED_TOKENS.filter((t) => t.native || Boolean(t.sac))
 }
 
 /**
- * Reverse lookup: curated metadata for a SAC address (undefined if not curated). Used by the
- * indexer to label/format a deposit recovered from chain (which carries only the SAC address).
+ * Reverse lookup: curated metadata for an ERC20 address (undefined if not curated). Used by
+ * the indexer to label/format a deposit recovered from chain.
  */
 export function tokenBySac(sac: string): TokenMeta | undefined {
-  if (sac === NATIVE_SAC) return CURATED_TOKENS[0]
   return CURATED_TOKENS.find((t) => t.sac === sac)
 }
 
@@ -110,7 +114,7 @@ import { erc20Abi } from 'viem'
 export async function resolveCustomToken(sacAddress: string): Promise<TokenMeta> {
   const sac = sacAddress.trim()
   if (!/^0x[a-fA-F0-9]{40}$/.test(sac)) {
-    throw new Error('Enter a valid ERC20 contract address — starts with “0x”.')
+    throw new Error('Enter a valid ERC20 contract address — starts with "0x".')
   }
   try {
     const decimals = await readContract(wagmiConfig, {
@@ -125,15 +129,13 @@ export async function resolveCustomToken(sacAddress: string): Promise<TokenMeta>
     })
 
     return {
+      code: symbol,
       name: symbol,
+      icon: symbol,
       sac,
       decimals,
-      symbol,
-      url: `https://coston2-explorer.flare.network/address/${sac}`,
-      assetCode: null,
-      assetType: 'native',
-      native: false
-    } as any
+      priceUsd: 0,
+    }
   } catch (e) {
     throw new Error('Failed to resolve ERC20 token at that address.')
   }
