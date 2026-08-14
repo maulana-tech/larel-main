@@ -11,7 +11,7 @@ import { formatAmount, parseAmount } from './format'
 import { RealLarelSdk } from './real-sdk'
 
 /**
- * A shielded asset's display code. The protocol is asset-agnostic — any Stellar Asset
+ * A shielded asset's display code. The protocol is asset-agnostic — any ERC20
  * Contract (SAC) can be deposited — so this is an open string, not a fixed union. Well-
  * known codes (FLR, USDC, ETH, BTC, XRP, bETH, bUSDC) have curated metadata in
  * `lib/tokens.ts`; custom tokens carry their own descriptor (see {@link DepositParams}).
@@ -60,7 +60,7 @@ export interface DepositParams {
 export interface WithdrawParams {
   asset: AssetCode
   amount: string
-  /** Classic Stellar recipient address (G…). */
+  /** Classic Flare recipient address (0x…). */
   recipient: string
   /** The exact note to withdraw (commitment hex), from the note picker. */
   commitment?: string
@@ -286,7 +286,7 @@ let singleton: LarelSdk | null = null
  * Returns the app-wide Larel client.
  *
  * By default this is the LIVE `RealLarelSdk`, wired to the deployed LarelPool on
- * Stellar Testnet (real deposit + portfolio; experimental withdraw). Set
+ * Flare Coston2 (real deposit + portfolio; experimental withdraw). Set
  * `VITE_USE_MOCK=true` to fall back to the offline `MockLarelSdk` for UI dev with no
  * wallet / network. Nothing else in the UI changes between the two.
  */
