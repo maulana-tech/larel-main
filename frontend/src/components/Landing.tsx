@@ -298,7 +298,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
         <div className="relative">
           <div className="flex flex-col gap-12 md:flex-row md:items-end md:justify-between">
             <nav className={`flex gap-6 font-mono text-[13px] uppercase tracking-[0.14em] ${dark ? 'text-[#ffffff]/70' : 'text-[#191919]/70'}`}>
-              <a href="https://github.com/ln-tc999/Larel.git" className={`transition ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}>GitHub</a>
+              <a href="https://github.com/maulana-tech/larel-main.git" className={`transition ${dark ? 'hover:text-[#ffffff]' : 'hover:text-[#191919]'}`}>GitHub</a>
             </nav>
 
             <div className="flex justify-end">
@@ -311,7 +311,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
                   Build on Flare
                 </div>
                 <p className={`text-[13px] leading-relaxed ${dark ? 'text-[#ffffff]/70' : 'text-[#191919]/70'}`}>
-                  Larel is a community-run project. We're always developing for everyone in the Flare ecosystem. To get involved, reach out with what you'd build.
+                  Larel is a application-run project. We're always developing for everyone in the Flare ecosystem.
                 </p>
               </div>
             </div>
