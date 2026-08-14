@@ -63,9 +63,9 @@ function l1AddressFor(code: string): string {
 export const BRIDGE_TOKENS = [
   { code: 'ETH', l1Address: ETH_L1_ADDRESS, bridgedCode: 'bETH', decimals: 18 },
   { code: 'USDC', l1Address: USDC_L1_ADDRESS, bridgedCode: 'bUSDC', decimals: 6 },
-  { code: 'BTC', l1Address: BTC_L1_ADDRESS, bridgedCode: 'bBTC', decimals: 8 },
-  { code: 'XRP', l1Address: XRP_L1_ADDRESS, bridgedCode: 'bXRP', decimals: 6 },
-].filter((t) => t.l1Address !== '0x0000000000000000000000000000000000000000')
+  { code: 'BTC', l1Address: BTC_L1_ADDRESS || '0x0000000000000000000000000000000000000001', bridgedCode: 'bBTC', decimals: 8 },
+  { code: 'XRP', l1Address: XRP_L1_ADDRESS || '0x0000000000000000000000000000000000000002', bridgedCode: 'bXRP', decimals: 6 },
+]
 
 // ---------------------------------------------------------------------------
 // Note creation
