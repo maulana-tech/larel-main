@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { sendTransaction, waitForTransactionReceipt, getAccount, writeContract, readContract } from '@wagmi/core'
 // @ts-nocheck
-import { Larel, type EvmOperation, type ProofData, type BalanceNote } from '@larel/sdk'
+import { Larel, type EvmOperation, type ProofData, type BalanceNote, createNote } from '@larel/sdk'
 // @ts-nocheck
 import { wagmiConfig } from './wagmi'
 // @ts-nocheck
