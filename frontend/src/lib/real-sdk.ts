@@ -256,20 +256,28 @@ export class RealLarelSdk implements LarelSdk {
   }
 
   async getShieldedBalances(): Promise<ShieldedBalance[]> {
-    const totals = new Map<string, bigint>()
+    const totals = new Map<string, { base: bigint, decimals: number }>()
     for (const n of loadNotes()) {
       if (!n.spent) {
-        totals.set(n.assetCode, (totals.get(n.assetCode) ?? 0n) + BigInt(n.amount))
+        const meta = assetMeta(n.assetCode)
+        const decimals = n.decimals ?? meta.decimals
+        const existing = totals.get(n.assetCode)
+        if (existing) {
+          existing.base += BigInt(n.amount)
+        } else {
+          totals.set(n.assetCode, { base: BigInt(n.amount), decimals })
+        }
       }
     }
     const out: ShieldedBalance[] = []
-    for (const [asset, base] of totals) {
+    for (const [asset, { base, decimals }] of totals) {
       if (base <= 0n) continue
-      const human = baseUnitsToNumber(base, 18) // Default to 18 decimals for EVM
+      const human = baseUnitsToNumber(base, decimals)
+      const meta = assetMeta(asset)
       out.push({
         asset,
         amount: formatAmount(human),
-        usdEstimate: human * 1.0 // Mock USD price
+        usdEstimate: human * (meta.priceUsd ?? 0)
       })
     }
     return out
