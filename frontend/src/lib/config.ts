@@ -55,6 +55,9 @@ export const MOCK_BTC_ADDRESS = env('VITE_BTC_SAC', '0xF84B7457B9d8Eb4ACfbc87522
 /** Mock XRP ERC20 on Coston2 (7 decimals). */
 export const MOCK_XRP_ADDRESS = env('VITE_XRP_SAC', '0xb1340025b940bA91B400D8b111D728c19FcF779b')
 
+/** TransferProcessor contract for ZK transfers. */
+export const TRANSFER_PROCESSOR_ADDRESS = env('VITE_TRANSFER_PROCESSOR', '0x6258f86d8c4931bfc1ac1bd779f912d2a4288faa')
+
 /** Whether all mock ERC20 tokens are deployed and configured. */
 export const MOCK_TOKENS_DEPLOYED = Boolean(MOCK_USDC_ADDRESS) && Boolean(MOCK_ETH_ADDRESS)
 
