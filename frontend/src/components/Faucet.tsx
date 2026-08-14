@@ -3,37 +3,45 @@ import { useWallet } from '../hooks/useWallet'
 import { CURATED_TOKENS } from '../lib/tokens'
 import { faucetMint } from '../lib/faucet'
 import { truncateKey } from '../lib/format'
+import { MOCK_TOKENS_DEPLOYED, USE_MOCK } from '../lib/config'
 import { CoinBadge } from './BrandIcons'
 import { Button } from './ui'
 import { ConnectWallet } from './ConnectWallet'
 
 import { useWalletClient, usePublicClient } from 'wagmi'
+import { flareTestnet } from 'wagmi/chains'
 
-const FAUCET_TOKENS = CURATED_TOKENS.filter((t) => t.faucet && t.sac)
+const FAUCET_TOKENS = CURATED_TOKENS.filter((t) => t.faucet)
 const DRIP = 1000
 
 /** Testnet faucet: mint mock tokens (USDC/ETH/BTC/XRP) to the connected wallet. */
 export function Faucet() {
   const wallet = useWallet()
-  const { data: walletClient } = useWalletClient()
-  const publicClient = usePublicClient()
+  const { data: walletClient } = useWalletClient({ chainId: flareTestnet.id })
+  const publicClient = usePublicClient({ chainId: flareTestnet.id })
   const [busy, setBusy] = useState<string | null>(null)
   const [msg, setMsg] = useState<Record<string, string>>({})
   const connected = wallet.status === 'connected'
 
   async function mint(code: string, sac: string, decimals: number) {
     if (!walletClient || !publicClient) {
-      setMsg((m) => ({ ...m, [code]: 'Wallet clients not ready.' }))
+      setMsg((m) => ({ ...m, [code]: 'Wallet not ready — make sure MetaMask is connected to Coston2.' }))
       return
     }
     setBusy(code)
     setMsg((m) => ({ ...m, [code]: '' }))
     try {
       const hash = await faucetMint(sac, BigInt(DRIP) * 10n ** BigInt(decimals), walletClient, publicClient)
-      setMsg((m) => ({ ...m, [code]: `✓ Minted ${DRIP.toLocaleString()} ${code} · ${truncateKey(hash, 6, 6)}` }))
+      setMsg((m) => ({ ...m, [code]: `Minted ${DRIP.toLocaleString()} ${code} · ${truncateKey(hash, 6, 6)}` }))
     } catch (e) {
       console.error(e)
-      setMsg((m) => ({ ...m, [code]: e instanceof Error ? e.message : 'Mint failed.' }))
+      const errMsg = e instanceof Error ? e.message : 'Mint failed.'
+      // Provide a more helpful error for common issues
+      if (errMsg.includes('contract') || errMsg.includes('deploy') || errMsg.includes('code')) {
+        setMsg((m) => ({ ...m, [code]: `Token contract not deployed yet. Run: forge script script/Deploy.s.sol` }))
+      } else {
+        setMsg((m) => ({ ...m, [code]: errMsg }))
+      }
     } finally {
       setBusy(null)
     }
@@ -61,6 +69,14 @@ export function Faucet() {
           </p>
         )}
 
+        {connected && !MOCK_TOKENS_DEPLOYED && !USE_MOCK && (
+          <p className="mt-4 rounded-none border border-yellow-500/30 bg-yellow-500/10 px-3.5 py-3 text-xs text-yellow-300">
+            Mock ERC20 token addresses are not configured. Deploy them with
+            <span className="mt-1 block font-mono">cd contracts && forge script script/Deploy.s.sol --broadcast</span>
+            then paste the addresses into <span className="font-mono">config.ts</span> or set <span className="font-mono">VITE_USDC_SAC</span> etc. env vars.
+          </p>
+        )}
+
         <div className="mt-4 space-y-2">
           {FAUCET_TOKENS.map((t) => (
             <div
@@ -75,9 +91,19 @@ export function Faucet() {
               <Button
                 size="sm"
                 className="ml-auto"
-                disabled={!connected || busy !== null}
+                disabled={!connected || busy !== null || (!t.sac && !USE_MOCK)}
                 loading={busy === t.code}
-                onClick={() => void mint(t.code, t.sac as string, t.decimals)}
+                onClick={() => {
+                  if (USE_MOCK) {
+                    setMsg((m) => ({ ...m, [t.code]: `Mock mode: ${DRIP.toLocaleString()} ${t.code} added to balance.` }))
+                    return
+                  }
+                  if (!t.sac) {
+                    setMsg((m) => ({ ...m, [t.code]: 'No contract address. Deploy mock tokens first.' }))
+                    return
+                  }
+                  void mint(t.code, t.sac, t.decimals)
+                }}
               >
                 {busy === t.code ? 'Minting…' : `Mint ${DRIP.toLocaleString()}`}
               </Button>
