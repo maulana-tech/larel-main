@@ -16,36 +16,11 @@ importers:
         specifier: ^4.23.1
         version: 4.23.1
 
-  fce-matcher/typescript:
-    dependencies:
-      '@larel/matcher':
-        specifier: file:./larel_matcher_local
-        version: file:fce-matcher/typescript/larel_matcher_local
-      '@noble/hashes':
-        specifier: ^1.7.0
-        version: 1.8.0
-      '@noble/secp256k1':
-        specifier: ^2.2.0
-        version: 2.3.0
-      viem:
-        specifier: ^2.47.4
-        version: 2.55.11(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.4.3)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.19.19
-        version: 22.20.1
-      typescript:
-        specifier: ^5.7.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.0.0
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.1)
-
   frontend:
     dependencies:
       '@larel/sdk':
         specifier: workspace:*
-        version: link:../sdk
+        version: link:../protocol/sdk
       '@noble/ciphers':
         specifier: ^2.2.0
         version: 2.2.0
@@ -147,7 +122,32 @@ importers:
         specifier: ^5.4.11
         version: 5.4.21(@types/node@22.20.1)
 
-  matcher:
+  protocol/fce-matcher/typescript:
+    dependencies:
+      '@larel/matcher':
+        specifier: file:./larel_matcher_local
+        version: file:protocol/fce-matcher/typescript/larel_matcher_local
+      '@noble/hashes':
+        specifier: ^1.7.0
+        version: 1.8.0
+      '@noble/secp256k1':
+        specifier: ^2.2.0
+        version: 2.3.0
+      viem:
+        specifier: ^2.47.4
+        version: 2.55.11(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.4.3)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.19.19
+        version: 22.20.1
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.1)
+
+  protocol/matcher:
     dependencies:
       '@larel/sdk':
         specifier: workspace:*
@@ -172,7 +172,7 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@20.19.43)
 
-  sdk:
+  protocol/sdk:
     dependencies:
       '@aztec/bb.js':
         specifier: 0.87.0
@@ -872,8 +872,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@larel/matcher@file:fce-matcher/typescript/larel_matcher_local':
-    resolution: {directory: fce-matcher/typescript/larel_matcher_local, type: directory}
+  '@larel/matcher@file:protocol/fce-matcher/typescript/larel_matcher_local':
+    resolution: {directory: protocol/fce-matcher/typescript/larel_matcher_local, type: directory}
 
   '@lit-labs/ssr-dom-shim@1.6.0':
     resolution: {integrity: sha512-VHb0ALPMTlgKjM6yIxxoQNnpKyUKLD04VzeQdsiXkMqkvYlAHxq9glGLmgbb889/1GsohSOAjvQYoiBppXFqrQ==}
@@ -4968,9 +4968,9 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@larel/matcher@file:fce-matcher/typescript/larel_matcher_local':
+  '@larel/matcher@file:protocol/fce-matcher/typescript/larel_matcher_local':
     dependencies:
-      '@larel/sdk': link:sdk
+      '@larel/sdk': link:protocol/sdk
 
   '@lit-labs/ssr-dom-shim@1.6.0': {}
 
