@@ -302,6 +302,34 @@ export function setLeafIndexForCommitment(commitmentHex: string, leafIndex: numb
 
 // --- Dark-pool orders (device-local; the order's secrets never leave this browser) --------
 
+const HISTORY_PREFIX = 'lax-stell.history.v1'
+
+function historyStorageKey(): string {
+  return `${HISTORY_PREFIX}:${POOL_TAG}:${activeAddress ?? 'anon'}`
+}
+
+export interface StoredHistoryItem {
+  id: string
+  type: 'Swap' | 'Deposit' | 'Withdrawal' | 'Limit Order (Filled)' | 'Limit Order (Cancelled)'
+  pairOrAsset: string
+  amountIn?: string
+  amountOut?: string
+  txHash?: string
+  createdAt: number
+}
+
+export function loadHistory(): StoredHistoryItem[] {
+  return read<StoredHistoryItem[]>(historyStorageKey(), [])
+}
+
+export function addHistoryItem(item: StoredHistoryItem): void {
+  const history = loadHistory()
+  history.unshift(item) // Add to beginning
+  // Keep only last 100 items
+  if (history.length > 100) history.length = 100
+  write(historyStorageKey(), history)
+}
+
 /** A placed sealed order the wallet is tracking so it can display + later cancel it. */
 export interface StoredOrder {
   /** order_commitment hex — the id. */
