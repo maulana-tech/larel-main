@@ -251,9 +251,6 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
 
 
         <div className="relative flex items-start justify-between">
-          <p className={`max-w-xs text-[15px] font-medium leading-snug ${dark ? 'text-[#ffffff]/80' : 'text-[#191919]/80'}`}>
-            Feel free to reach out if you want private money on Flare — or simply have a chat.
-          </p>
           <a href="/" className="transition hover:opacity-75">
             <img src={larelLogo} alt="Larel" className="h-10 w-auto opacity-85" />
           </a>
