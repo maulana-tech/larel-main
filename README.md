@@ -255,61 +255,6 @@ graph TD
 
 ---
 
-## Quick Start
-
-### Prerequisites
-
-- Node.js 20+ and `pnpm`
-- An EVM wallet configured for Flare Coston2 (chainId 114)
-- Pinned cryptographic tools:
-  - `nargo` `1.0.0-beta.9`
-  - `bb` `0.87.0`
-
-### 1. Environment setup
-
-```bash
-source ./env.sh
-```
-
-### 2. Run circuit tests
-
-```bash
-cd circuits/noir/withdraw && nargo test
-```
-
-Or build, prove and export VKs for all five circuits:
-
-```bash
-./circuits/noir/build_all.sh
-```
-
-Proof MUST be 14,592 bytes and VK MUST be 1,760 bytes — enforced by the script.
-
-### 3. Build SDK and start the frontend
-
-```bash
-pnpm install
-pnpm --filter @larel/sdk build
-pnpm --filter frontend dev
-```
-
-Open `http://localhost:5173`.
-
-> The frontend's transaction layer still targets Stellar and will not transact against Flare
-> until Phase 3 of [plan-migrate.md](./plan-migrate.md) lands.
-
-### 4. Generate a Solidity verifier
-
-Not yet wired into the build, but this is the command the migration depends on:
-
-```bash
-cd circuits/noir/withdraw
-nargo compile
-bb write_vk --scheme ultra_honk -b target/withdraw.json -o target/vk
-bb write_solidity_verifier --scheme ultra_honk -k target/vk/vk -o target/HonkVerifier.sol
-```
-
----
 
 ## Hackathon
 
@@ -318,11 +263,6 @@ bb write_solidity_verifier --scheme ultra_honk -k target/vk/vk -o target/HonkVer
 | **Event** | Flare Summer Signal |
 | **Bounty** | Bounty 2 — Confidential Compute Apps |
 | **Network** | Flare Coston2 testnet (chainId 114) |
-
-The submission targets two of the track's named directions directly: **confidential orderbooks**
-and **secure matching engines**. See [plan-migrate.md](./plan-migrate.md) §2b for the four
-design questions the track requires answering — what runs privately in the TEE, what attests
-it, what reaches the chain, and what trust assumptions remain.
 
 ---
 
