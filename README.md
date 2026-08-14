@@ -252,17 +252,6 @@ graph TD
 
 ---
 
-## Key Files
-
-| Component | Directory / File | Description |
-|---|---|---|
-| **Noir Circuits** | [`circuits/noir/`](./circuits/noir/) | `withdraw`, `transfer`, `place_order`, `match_orders`, `cancel_order`, plus `larel_lib`. |
-| **Larel SDK** | [`sdk/`](./sdk/) | Commitments, nullifiers, Merkle trees, Noir proving, transaction building. |
-| **Solidity workspace** | [`bridge/l1/`](./bridge/l1/) | Existing Foundry project. To be repurposed as the Flare contract workspace. |
-| **Order Matcher** | [`matcher/`](./matcher/) | Off-chain engine pairing sealed orders for midpoint swaps. |
-| **Web Frontend** | [`frontend/`](./frontend/) | React/Vite dashboard: onboard, pay, trade, portfolio. |
-| **Migration plan** | [`plan-migrate.md`](./plan-migrate.md) | Phases, risks, and the go/no-go gas spike. |
-| **Bounty brief** | [`CONTEXT.md`](./CONTEXT.md) | Flare Summer Signal · Bounty 2 (Confidential Compute Apps) requirements and resources. |
 
 ---
 
