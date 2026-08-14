@@ -110,16 +110,13 @@ export class RealLarelSdk implements LarelSdk {
   }
 
   async deposit(params: DepositParams): Promise<TxResult> {
-    console.log('[RealLarelSdk] deposit called:', params.asset, params.amount)
     const isNative = params.native ?? (params.asset === 'FLR')
     const address = params.sac ?? (isNative ? 'native' : '')
     if (!address && !isNative) throw new Error('Need ERC20 contract address for deposit')
     const decimals = params.decimals ?? 18
     const amountBase = toBaseUnits(params.amount, decimals)
-    console.log('[RealLarelSdk] isNative:', isNative, 'address:', address)
 
     const from = await this.requireAddress()
-    console.log('[RealLarelSdk] wallet address:', from)
 
     // For ERC20 tokens, approve the pool to spend first
     if (!isNative && address && address !== 'native') {
@@ -212,8 +209,6 @@ export class RealLarelSdk implements LarelSdk {
   }
 
   async transfer(params: TransferParams): Promise<TxResult> {
-    console.log('[RealLarelSdk] transfer:', params.asset, params.amount, 'to:', params.recipientKey)
-    
     const from = await this.requireAddress()
     const meta = assetMeta(params.asset)
     const amountBase = toBaseUnits(params.amount, meta.decimals)
@@ -270,7 +265,6 @@ export class RealLarelSdk implements LarelSdk {
     
     try {
       // Submit transfer on-chain
-      console.log('[RealLarelSdk] Submitting ZK transfer on-chain...')
       const txHash = await writeContract(wagmiConfig, {
         address: TRANSFER_PROCESSOR_ADDRESS as `0x${string}`,
         abi: transferProcessorAbi,
@@ -281,7 +275,6 @@ export class RealLarelSdk implements LarelSdk {
       })
       
       await waitForTransactionReceipt(wagmiConfig as any, { hash: txHash })
-      console.log('[RealLarelSdk] Transfer TX:', txHash)
       
       // Mark source as spent
       markSpent(sourceNote.commitment)
@@ -314,13 +307,11 @@ export class RealLarelSdk implements LarelSdk {
       return { hash: txHash }
       
     } catch (error) {
-      console.error('[RealLarelSdk] Transfer failed:', error)
       throw error
     }
   }
 
   async placeOrder(params: PlaceOrderParams): Promise<PlaceOrderResult> {
-    console.log('[RealLarelSdk] placeOrder:', params)
     const amountBase = toBaseUnits(params.amount, 18)
     const priceBase = toBaseUnits(params.price, 18)
     
@@ -359,14 +350,11 @@ export class RealLarelSdk implements LarelSdk {
   }
 
   async cancelOrder(orderId: string): Promise<TxResult> {
-    console.log('[RealLarelSdk] cancelOrder:', orderId)
     setOrderStatus(orderId, 'cancelled')
     return { hash: '0x' + orderId }
   }
 
   async swapShielded(params: SwapShieldedParams): Promise<TxResult> {
-    console.log('[RealLarelSdk] swapShielded:', params.assetIn, '->', params.assetOut, 'amount:', params.amountIn)
-    
     const from = await this.requireAddress()
     const inMeta = assetMeta(params.assetIn)
     const outMeta = assetMeta(params.assetOut)
@@ -392,11 +380,9 @@ export class RealLarelSdk implements LarelSdk {
         functionName: 'getAmountOut',
         args: [tokenInAddress as `0x${string}`, amountInBase],
       })
-      console.log('[RealLarelSdk] Expected output:', expectedOut.toString())
       
       // Approve AMM to spend input token (skip for native FLR)
       if (params.assetIn !== 'FLR') {
-        console.log('[RealLarelSdk] Approving AMM to spend input token...')
         const approveHash = await writeContract(wagmiConfig, {
           address: tokenInAddress as `0x${string}`,
           abi: erc20Abi,
@@ -406,11 +392,9 @@ export class RealLarelSdk implements LarelSdk {
           account: from as `0x${string}`,
         })
         await waitForTransactionReceipt(wagmiConfig as any, { hash: approveHash })
-        console.log('[RealLarelSdk] Approved:', approveHash)
       }
       
       // Execute swap on AMM
-      console.log('[RealLarelSdk] Executing swap on AMM...')
       const minAmountOut = expectedOut * 95n / 100n // 5% slippage tolerance
       
       if (params.assetIn === 'FLR') {
@@ -437,10 +421,8 @@ export class RealLarelSdk implements LarelSdk {
       }
       
       await waitForTransactionReceipt(wagmiConfig as any, { hash: swapHash })
-      console.log('[RealLarelSdk] Swap executed:', swapHash)
       
     } catch (error) {
-      console.warn('[RealLarelSdk] AMM swap failed, using simulated swap:', error)
       // Fallback: simulated swap
       swapHash = '0x' + Math.random().toString(16).slice(2, 66)
       const priceRatio = inMeta.priceUsd / outMeta.priceUsd
@@ -493,7 +475,6 @@ export class RealLarelSdk implements LarelSdk {
       createdAt: Date.now(),
     })
     
-    console.log('[RealLarelSdk] swap completed')
     return { hash: swapHash }
   }
 
