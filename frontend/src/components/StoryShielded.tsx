@@ -64,17 +64,6 @@ const MODULES = [
   { k: 'SWAP', d: 'a zero-knowledge dark pool; orders matched blind.', to: '/swap' },
 ]
 
-/** Transparent seamless loop as an animated WebP; swaps to a static poster
- *  frame under prefers-reduced-motion (picture media selection). */
-function LoopAsset({ src, poster, className }: { src: string; poster: string; className?: string }) {
-  const dark = useIsDark()
-  return (
-    <picture className="contents">
-      <source media="(prefers-reduced-motion: reduce)" srcSet={poster} />
-      <img src={src} alt="" aria-hidden className={`${className} ${dark ? 'invert mix-blend-screen opacity-90' : 'mix-blend-multiply'}`} />
-    </picture>
-  )
-}
 
 function Label({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
@@ -145,8 +134,8 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
                 }`}
               >
                 <div className="grid w-full grid-cols-1 items-center gap-x-12 gap-y-8 md:grid-cols-2">
-                  <div className={`mx-auto w-[clamp(180px,28vw,320px)] ${s.flip ? 'md:order-1' : 'md:order-2'}`}>
-                    <LoopAsset src={s.src} poster={s.poster} className="block w-full h-auto max-h-[32vh] object-contain" />
+                  <div className={`mx-auto w-[clamp(180px,28vw,320px)] overflow-hidden rounded-none border border-spectral/10 ${s.flip ? 'md:order-1' : 'md:order-2'}`}>
+                    <img src={s.src} alt="" className="block w-full h-auto object-cover" />
                   </div>
                   <div className={`max-w-md ${s.flip ? 'md:order-2' : 'md:order-1'}`}>
                     <Label>
