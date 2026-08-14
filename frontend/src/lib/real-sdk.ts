@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { sendTransaction, waitForTransactionReceipt, getAccount } from '@wagmi/core'
+import { sendTransaction, waitForTransactionReceipt, getAccount, writeContract, readContract } from '@wagmi/core'
 // @ts-nocheck
 import { Larel, type EvmOperation, type ProofData, type BalanceNote } from '@larel/sdk'
 // @ts-nocheck
@@ -25,6 +25,7 @@ import type {
 import { assetIdFor, assetMeta } from './tokens'
 // @ts-nocheck
 import { formatAmount } from './format'
+import { erc20Abi, parseAbi } from 'viem'
 
 // Parse decimal to base units
 export function toBaseUnits(input: string, decimals: number): bigint {
@@ -72,13 +73,37 @@ export class RealLarelSdk implements LarelSdk {
   }
 
   async deposit(params: DepositParams): Promise<TxResult> {
-    const isNative = params.native ?? (params.asset === 'FLR' || params.asset === 'ETH')
+    const isNative = params.native ?? (params.asset === 'FLR')
     const address = params.sac ?? (isNative ? 'native' : '')
     if (!address && !isNative) throw new Error('Need ERC20 contract address for deposit')
     const decimals = params.decimals ?? 18
     const amountBase = toBaseUnits(params.amount, decimals)
 
     const from = await this.requireAddress()
+
+    // For ERC20 tokens, approve the pool to spend first
+    if (!isNative && address && address !== 'native') {
+      const allowance = await readContract(wagmiConfig, {
+        address: address as `0x${string}`,
+        abi: erc20Abi,
+        functionName: 'allowance',
+        args: [from as `0x${string}`, POOL_CONTRACT_ID as `0x${string}`],
+      })
+
+      if (allowance < amountBase) {
+        // Need to approve
+        const approveHash = await writeContract(wagmiConfig, {
+          address: address as `0x${string}`,
+          abi: erc20Abi,
+          functionName: 'approve',
+          args: [POOL_CONTRACT_ID as `0x${string}`, amountBase],
+          chain: null,
+          account: from as `0x${string}`,
+        })
+        await waitForTransactionReceipt(wagmiConfig as any, { hash: approveHash })
+      }
+    }
+
     const { note, operation, commitment } = this.getSdk().deposit({
       asset: { assetId: assetIdFor({ native: isNative, sac: address }), address },
       amount: amountBase,
