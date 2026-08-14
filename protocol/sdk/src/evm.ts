@@ -92,7 +92,7 @@ export class LarelContract {
     this.address = address as Address;
   }
 
-  /** deposit(address asset, uint256 amount, bytes32 commitment) */
+  /** deposit(bytes32 commitment, address asset, uint256 amount) */
   depositData(args: { asset: string; amount: bigint; commitment: Field }): `0x${string}` {
     const isNative = args.asset === "native" || args.asset === "ETH" || args.asset === "XLM";
     const assetAddr = isNative ? '0x0000000000000000000000000000000000000000' : args.asset;
@@ -100,7 +100,7 @@ export class LarelContract {
     return encodeFunctionData({
       abi: larelPoolAbi,
       functionName: 'deposit',
-      args: [assetAddr, args.amount, bytesToHex(fieldToBytes(args.commitment))],
+      args: [bytesToHex(fieldToBytes(args.commitment)), assetAddr, args.amount],
     });
   }
 
