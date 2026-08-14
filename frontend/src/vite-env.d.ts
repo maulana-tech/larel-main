@@ -11,7 +11,7 @@ interface ImportMetaEnv {
   readonly VITE_USDC_SAC?: string
   readonly VITE_SOROBAN_RPC_URL?: string
   readonly VITE_NETWORK_PASSPHRASE?: string
-  // --- Cross-chain bridge (Ethereum Sepolia <-> Stellar) ---
+  // --- Cross-chain bridge (Ethereum Sepolia <-> Flare Coston2) ---
   /** Run the Bridge tab as a self-contained mock walkthrough (no wallets). */
   readonly VITE_USE_MOCK_BRIDGE?: string
   /** Ethereum chain id of the L1 bridge (Sepolia = 11155111). */
@@ -30,6 +30,14 @@ interface ImportMetaEnv {
   readonly VITE_BRIDGE_DOMAIN?: string
   /** Sepolia test-USDC ERC20 address (0x…). */
   readonly VITE_BRIDGE_USDC_L1?: string
+  /** Sepolia test-BTC ERC20 address (0x…). */
+  readonly VITE_BRIDGE_BTC_L1?: string
+  /** Sepolia test-XRP ERC20 address (0x…). */
+  readonly VITE_BRIDGE_XRP_L1?: string
+  /** Mock ERC20 token addresses on Coston2 for the faucet. */
+  readonly VITE_ETH_SAC?: string
+  readonly VITE_BTC_SAC?: string
+  readonly VITE_XRP_SAC?: string
 }
 
 interface ImportMeta {
