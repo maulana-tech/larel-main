@@ -1,5 +1,5 @@
 packages:
-  - "sdk"
-  - "matcher"
+  - "protocol/sdk"
+  - "protocol/matcher"
   - "frontend"
-  - "fce-matcher/typescript"
+  - "protocol/fce-matcher/typescript"
