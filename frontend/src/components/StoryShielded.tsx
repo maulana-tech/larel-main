@@ -1,14 +1,10 @@
 import type { ReactNode } from 'react'
 import ScrollStack, { ScrollStackItem } from './ScrollStack'
 import { BentoSection, SystemArchitecture, SwapAmmMechanism } from './StorySections'
-import hourglassUrl from '../assets/hourglass.webp'
-import hourglassPoster from '../assets/hourglass-poster.webp'
-import vortexUrl from '../assets/vortex.webp'
-import vortexPoster from '../assets/vortex-poster.webp'
-import balanceUrl from '../assets/balance.webp'
-import balancePoster from '../assets/balance-poster.webp'
-import cubeUrl from '../assets/cube.webp'
-import cubePoster from '../assets/cube-poster.webp'
+import asset1 from '../../assets/assets-01.webp'
+import asset2 from '../../assets/assets-02.webp'
+import asset3 from '../../assets/assets-03.webp'
+import asset4 from '../../assets/assets-04.webp'
 import { useIsDark } from '../hooks/useTheme'
 
 // Light-speck film grain for the dark ground (white noise, low alpha) — matches
@@ -25,8 +21,8 @@ const STACK = [
     coord: '[ every block · forever ]',
     title: 'public chains remember everything.',
     body: 'every block on an open chain is permanent, public and linkable amounts, balances, counterparties, readable by anyone with the address, forever. the ledger never forgets.',
-    src: hourglassUrl,
-    poster: hourglassPoster,
+    src: asset1,
+    poster: asset1,
     flip: false,
   },
   {
@@ -35,8 +31,8 @@ const STACK = [
     coord: '[ x * y = k · midpoint ]',
     title: 'constant product & blind matching.',
     body: 'swaps run on a constant product formula (x * y = k) combined with shielded matching. orders are submitted as cryptographic commitments, matched blind off-chain at the midpoint reference price, and settled publicly on-chain without exposing user identities or trade paths.',
-    src: vortexUrl,
-    poster: vortexPoster,
+    src: asset2,
+    poster: asset2,
     flip: true,
   },
   {
@@ -45,8 +41,8 @@ const STACK = [
     coord: '[ Poseidon2 · Merkle ]',
     title: 'the shielded layer forgets.',
     body: 'bridge in and your balance becomes a Poseidon2 commitment a note in a Merkle tree. amount and owner stay inside the hash; only the root is ever public, and old notes never link to new.',
-    src: balanceUrl,
-    poster: balancePoster,
+    src: asset3,
+    poster: asset3,
     flip: false,
   },
   {
@@ -55,8 +51,8 @@ const STACK = [
     coord: '[ UltraHonk · BN254 ]',
     title: 'the math is the lock.',
     body: 'every move out is a zero-knowledge proof, checked on-chain inside a Flare EVM contract. a spend reveals only a nullifier, so the old note and the new never link. no valid proof, no funds move.',
-    src: cubeUrl,
-    poster: cubePoster,
+    src: asset4,
+    poster: asset4,
     flip: true,
   },
 ]
@@ -71,10 +67,11 @@ const MODULES = [
 /** Transparent seamless loop as an animated WebP; swaps to a static poster
  *  frame under prefers-reduced-motion (picture media selection). */
 function LoopAsset({ src, poster, className }: { src: string; poster: string; className?: string }) {
+  const dark = useIsDark()
   return (
     <picture className="contents">
       <source media="(prefers-reduced-motion: reduce)" srcSet={poster} />
-      <img src={src} alt="" aria-hidden className={className} />
+      <img src={src} alt="" aria-hidden className={`${className} ${dark ? 'invert mix-blend-screen opacity-90' : 'mix-blend-multiply'}`} />
     </picture>
   )
 }
