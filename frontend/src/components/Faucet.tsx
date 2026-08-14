@@ -9,7 +9,6 @@ import { Button } from './ui'
 import { ConnectWallet } from './ConnectWallet'
 
 import { useWalletClient, usePublicClient } from 'wagmi'
-import { flareTestnet } from 'wagmi/chains'
 
 const FAUCET_TOKENS = CURATED_TOKENS.filter((t) => t.faucet)
 const DRIP = 1000
@@ -17,15 +16,15 @@ const DRIP = 1000
 /** Testnet faucet: mint mock tokens (USDC/ETH/BTC/XRP) to the connected wallet. */
 export function Faucet() {
   const wallet = useWallet()
-  const { data: walletClient } = useWalletClient({ chainId: flareTestnet.id })
-  const publicClient = usePublicClient({ chainId: flareTestnet.id })
+  const { data: walletClient } = useWalletClient()
+  const publicClient = usePublicClient()
   const [busy, setBusy] = useState<string | null>(null)
   const [msg, setMsg] = useState<Record<string, string>>({})
   const connected = wallet.status === 'connected'
 
   async function mint(code: string, sac: string, decimals: number) {
     if (!walletClient || !publicClient) {
-      setMsg((m) => ({ ...m, [code]: 'Wallet not ready — make sure MetaMask is connected to Coston2.' }))
+      setMsg((m) => ({ ...m, [code]: 'Wallet not ready — connect MetaMask and try again.' }))
       return
     }
     setBusy(code)
