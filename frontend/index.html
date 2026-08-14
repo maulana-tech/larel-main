@@ -7,7 +7,7 @@
       // otherwise follow the OS preference, defaulting to the signature dark "Mist".
       (function () {
         try {
-          var saved = localStorage.getItem('larel.theme');
+          var saved = localStorage.getItem('lax-stell.theme');
           // Default to the signature dark "Mist" theme; only go light if the user chose it.
           var dark = saved ? saved === 'dark' : true;
           document.documentElement.classList.toggle('dark', dark);
