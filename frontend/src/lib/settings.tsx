@@ -98,7 +98,7 @@ const en = {
   'settings.langFil': 'Filipino',
 
   // Navigation
-  'nav.deposit': 'Deposit / Withdraw',
+  'nav.deposit': 'Bridge',
   'nav.pay': 'Pay',
   'nav.swap': 'Swap',
   'nav.receive': 'Receive',
