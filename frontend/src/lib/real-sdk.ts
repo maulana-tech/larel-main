@@ -12,6 +12,13 @@ import { getSpendingKey, addNote, loadNotes, markSpent, addOrder, loadOrders, se
 // SparkDEX V2 Router on Flare Mainnet (also works on Coston2 testnet)
 const SPARKDEX_ROUTER = '0x4a1E5A90e9943467FAd1acea1E7F0e5e88472a1e'
 const WFLR_ADDRESS = '0x1D80c49BbBCd1C0911346656B529DF9E5c2F783d' // Wrapped FLR
+
+// Get ERC20 address for a token (handle native FLR -> WFLR)
+function getTokenAddress(code: string): string | undefined {
+  if (code === 'FLR') return WFLR_ADDRESS
+  const meta = assetMeta(code)
+  return meta.sac
+}
 import type {
   DepositParams,
   OpenOrder,
@@ -267,26 +274,28 @@ export class RealLarelSdk implements LarelSdk {
     const amountInBase = toBaseUnits(params.amountIn, inMeta.decimals)
     const amountOutMinBase = toBaseUnits(params.amountOutMin, outMeta.decimals)
     
-    // Get token addresses
-    const tokenInAddress = inMeta.sac
-    const tokenOutAddress = outMeta.sac
+    // Get token addresses (handle native FLR -> WFLR)
+    const tokenInAddress = getTokenAddress(params.assetIn)
+    const tokenOutAddress = getTokenAddress(params.assetOut)
     
     if (!tokenInAddress || !tokenOutAddress) {
       throw new Error('Both tokens need ERC20 addresses for swap')
     }
     
-    // Step 1: Approve SparkDEX router to spend input token
-    console.log('[RealLarelSdk] Approving router to spend input token...')
-    const approveHash = await writeContract(wagmiConfig, {
-      address: tokenInAddress as `0x${string}`,
-      abi: erc20Abi,
-      functionName: 'approve',
-      args: [SPARKDEX_ROUTER as `0x${string}`, amountInBase],
-      chain: null,
-      account: from as `0x${string}`,
-    })
-    await waitForTransactionReceipt(wagmiConfig as any, { hash: approveHash })
-    console.log('[RealLarelSdk] Approved:', approveHash)
+    // Step 1: Approve SparkDEX router to spend input token (skip for native FLR)
+    if (params.assetIn !== 'FLR') {
+      console.log('[RealLarelSdk] Approving router to spend input token...')
+      const approveHash = await writeContract(wagmiConfig, {
+        address: tokenInAddress as `0x${string}`,
+        abi: erc20Abi,
+        functionName: 'approve',
+        args: [SPARKDEX_ROUTER as `0x${string}`, amountInBase],
+        chain: null,
+        account: from as `0x${string}`,
+      })
+      await waitForTransactionReceipt(wagmiConfig as any, { hash: approveHash })
+      console.log('[RealLarelSdk] Approved:', approveHash)
+    }
     
     // Step 2: Get expected output amount from SparkDEX
     const path = [tokenInAddress as `0x${string}`, tokenOutAddress as `0x${string}`]
@@ -302,14 +311,41 @@ export class RealLarelSdk implements LarelSdk {
     // Step 3: Execute swap on SparkDEX
     console.log('[RealLarelSdk] Executing swap on SparkDEX...')
     const deadline = Math.floor(Date.now() / 1000) + 60 * 20 // 20 minutes
-    const swapHash = await writeContract(wagmiConfig, {
-      address: SPARKDEX_ROUTER as `0x${string}`,
-      abi: uniswapV2RouterAbi,
-      functionName: 'swapExactTokensForTokens',
-      args: [amountInBase, amountOutMinBase, path, from as `0x${string}`, BigInt(deadline)],
-      chain: null,
-      account: from as `0x${string}`,
-    })
+    
+    let swapHash: string
+    if (params.assetIn === 'FLR') {
+      // Native FLR -> use swapExactETHForTokens
+      swapHash = await writeContract(wagmiConfig, {
+        address: SPARKDEX_ROUTER as `0x${string}`,
+        abi: uniswapV2RouterAbi,
+        functionName: 'swapExactETHForTokens',
+        args: [amountOutMinBase, path, from as `0x${string}`, BigInt(deadline)],
+        value: amountInBase,
+        chain: null,
+        account: from as `0x${string}`,
+      })
+    } else if (params.assetOut === 'FLR') {
+      // Token -> Native FLR: use swapExactTokensForETH
+      swapHash = await writeContract(wagmiConfig, {
+        address: SPARKDEX_ROUTER as `0x${string}`,
+        abi: uniswapV2RouterAbi,
+        functionName: 'swapExactTokensForETH',
+        args: [amountInBase, amountOutMinBase, path, from as `0x${string}`, BigInt(deadline)],
+        chain: null,
+        account: from as `0x${string}`,
+      })
+    } else {
+      // Token -> Token: use swapExactTokensForTokens
+      swapHash = await writeContract(wagmiConfig, {
+        address: SPARKDEX_ROUTER as `0x${string}`,
+        abi: uniswapV2RouterAbi,
+        functionName: 'swapExactTokensForTokens',
+        args: [amountInBase, amountOutMinBase, path, from as `0x${string}`, BigInt(deadline)],
+        chain: null,
+        account: from as `0x${string}`,
+      })
+    }
+    
     await waitForTransactionReceipt(wagmiConfig as any, { hash: swapHash })
     console.log('[RealLarelSdk] Swap executed:', swapHash)
     
