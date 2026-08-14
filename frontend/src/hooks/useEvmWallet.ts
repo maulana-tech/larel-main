@@ -28,8 +28,8 @@ export interface EvmWalletState {
 
 /**
  * The EVM (Ethereum Sepolia) side of the bridge — MetaMask via wagmi/viem. Mirrors the
- * shape of the Stellar `useWallet` hook so the Bridge tab can drive both wallets
- * symmetrically. Independent of the Stellar Wallets Kit; the other tabs never touch it.
+ * shape of the Flare `useWallet` hook so the Bridge tab can drive both wallets
+ * symmetrically. Independent of the Flare Wallets Kit; the other tabs never touch it.
  */
 export function useEvmWallet(): EvmWalletState {
   const { address, isConnected, chainId } = useAccount()
