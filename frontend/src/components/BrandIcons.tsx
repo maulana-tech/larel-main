@@ -7,7 +7,7 @@ import larelLogo from '../assets/larel-logo.png'
  *
  * Rendered as single-color glyphs (they inherit `currentColor`) so they sit cleanly
  * in the black-and-white UI — no external image fetches, so nothing can 404. The
- * Stellar and Ethereum paths are the canonical simple-icons marks; USDC and the
+ * Flare and Ethereum paths are the canonical simple-icons marks; USDC and the
  * Lax-Stell mark are drawn to match the same weight.
  */
 
@@ -101,7 +101,7 @@ const SIZES = {
 
 /**
  * A chain or token logo inside a round monochrome chip. `name` is a chain id
- * (`stellar`/`ethereum`/`lax-stell`) or a token code (`XLM`, `ETH`, `bETH`, …).
+ * (`flare`/`ethereum`/`lax-stell`) or a token code (`FLR`, `ETH`, `bETH`, …).
  * Unknown names fall back to a short mono label so nothing renders empty.
  */
 export function CoinBadge({
