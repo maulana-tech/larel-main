@@ -30,7 +30,7 @@ import { erc20Abi, parseAbi } from 'viem'
 // Parse decimal to base units
 export function toBaseUnits(input: string, decimals: number): bigint {
   const trimmed = input.replace(/,/g, '').trim()
-  if (!/^\\d*(\\.\\d*)?$/.test(trimmed) || trimmed === '' || trimmed === '.') {
+  if (!/^\d*(\.\d*)?$/.test(trimmed) || trimmed === '' || trimmed === '.') {
     throw new Error(`Invalid amount: "${input}"`)
   }
   const [whole, frac = ''] = trimmed.split('.')
