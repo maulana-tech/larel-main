@@ -9,15 +9,36 @@ import { POOL_CONTRACT_ID } from './config'
 // @ts-nocheck
 import { getSpendingKey, addNote, loadNotes, markSpent, addOrder, loadOrders, setOrderStatus, loadHistory, addHistoryItem } from './note-store'
 
-// SparkDEX V2 Router on Flare Mainnet (also works on Coston2 testnet)
-const SPARKDEX_ROUTER = '0x4a1E5A90e9943467FAd1acea1E7F0e5e88472a1e'
-const WFLR_ADDRESS = '0x1D80c49BbBCd1C0911346656B529DF9E5c2F783d' // Wrapped FLR
+// SimpleAMM contract addresses on Coston2
+const AMM_POOLS: Record<string, string> = {
+  'FLR/USDC': '0x6BdB65a29aB0aA63Ed9ab1c6EC238Cd455cbdB2c',
+  'FLR/ETH': '0x8Ff8Ba795085540cC7021c5eb58CF4971eb3940E',
+  'FLR/BTC': '0xC5F9Be31f97EA13729a832F1fc41797D41C89aD1',
+  'FLR/XRP': '0xD0aCae33a7c4eB3b2A3Ce1bb3f2fc489e6B40B8e',
+  'USDC/ETH': '0x8A28b7F3448f75789c9D6ff5f0E5DdC59C744e98',
+}
 
-// Get ERC20 address for a token (handle native FLR -> WFLR)
-function getTokenAddress(code: string): string | undefined {
-  if (code === 'FLR') return WFLR_ADDRESS
+// SimpleAMM ABI
+const simpleAMMAbi = parseAbi([
+  'function swap(address tokenIn, uint256 amountIn, uint256 minAmountOut) external payable returns (uint256 amountOut)',
+  'function getAmountOut(address tokenIn, uint256 amountIn) external view returns (uint256)',
+  'function getReserves() external view returns (uint256, uint256)',
+  'function tokenA() external view returns (address)',
+  'function tokenB() external view returns (address)',
+])
+
+// Get AMM pool address for a token pair
+function getAMMPool(tokenIn: string, tokenOut: string): string | undefined {
+  const key1 = `${tokenIn}/${tokenOut}`
+  const key2 = `${tokenOut}/${tokenIn}`
+  return AMM_POOLS[key1] || AMM_POOLS[key2]
+}
+
+// Get token address for AMM (native FLR = address(0))
+function getAMMTokenAddress(code: string): string {
+  if (code === 'FLR') return '0x0000000000000000000000000000000000000000'
   const meta = assetMeta(code)
-  return meta.sac
+  return meta.sac || '0x0000000000000000000000000000000000000000'
 }
 import type {
   DepositParams,
@@ -272,29 +293,37 @@ export class RealLarelSdk implements LarelSdk {
     const inMeta = assetMeta(params.assetIn)
     const outMeta = assetMeta(params.assetOut)
     const amountInBase = toBaseUnits(params.amountIn, inMeta.decimals)
-    const amountOutMinBase = toBaseUnits(params.amountOutMin, outMeta.decimals)
     
-    // Get token addresses (handle native FLR -> WFLR)
-    const tokenInAddress = getTokenAddress(params.assetIn)
-    const tokenOutAddress = getTokenAddress(params.assetOut)
-    
-    if (!tokenInAddress || !tokenOutAddress) {
-      throw new Error('Both tokens need ERC20 addresses for swap')
+    // Get AMM pool address
+    const poolAddress = getAMMPool(params.assetIn, params.assetOut)
+    if (!poolAddress) {
+      throw new Error(`No AMM pool for ${params.assetIn}/${params.assetOut}`)
     }
     
+    const tokenInAddress = getAMMTokenAddress(params.assetIn)
+    const tokenOutAddress = getAMMTokenAddress(params.assetOut)
+    
     let swapHash: string
-    let expectedOut = amountOutMinBase
+    let expectedOut: bigint
     
     try {
-      // Try real swap via SparkDEX
-      // Step 1: Approve SparkDEX router to spend input token (skip for native FLR)
+      // Get expected output from AMM
+      expectedOut = await readContract(wagmiConfig, {
+        address: poolAddress as `0x${string}`,
+        abi: simpleAMMAbi,
+        functionName: 'getAmountOut',
+        args: [tokenInAddress as `0x${string}`, amountInBase],
+      })
+      console.log('[RealLarelSdk] Expected output:', expectedOut.toString())
+      
+      // Approve AMM to spend input token (skip for native FLR)
       if (params.assetIn !== 'FLR') {
-        console.log('[RealLarelSdk] Approving router to spend input token...')
+        console.log('[RealLarelSdk] Approving AMM to spend input token...')
         const approveHash = await writeContract(wagmiConfig, {
           address: tokenInAddress as `0x${string}`,
           abi: erc20Abi,
           functionName: 'approve',
-          args: [SPARKDEX_ROUTER as `0x${string}`, amountInBase],
+          args: [poolAddress as `0x${string}`, amountInBase],
           chain: null,
           account: from as `0x${string}`,
         })
@@ -302,46 +331,28 @@ export class RealLarelSdk implements LarelSdk {
         console.log('[RealLarelSdk] Approved:', approveHash)
       }
       
-      // Step 2: Get expected output amount from SparkDEX
-      const path = [tokenInAddress as `0x${string}`, tokenOutAddress as `0x${string}`]
-      const amountsOut = await readContract(wagmiConfig, {
-        address: SPARKDEX_ROUTER as `0x${string}`,
-        abi: uniswapV2RouterAbi,
-        functionName: 'getAmountsOut',
-        args: [amountInBase, path],
-      })
-      expectedOut = amountsOut[1]
-      console.log('[RealLarelSdk] Expected output:', expectedOut.toString())
-      
-      // Step 3: Execute swap on SparkDEX
-      console.log('[RealLarelSdk] Executing swap on SparkDEX...')
-      const deadline = Math.floor(Date.now() / 1000) + 60 * 20 // 20 minutes
+      // Execute swap on AMM
+      console.log('[RealLarelSdk] Executing swap on AMM...')
+      const minAmountOut = expectedOut * 95n / 100n // 5% slippage tolerance
       
       if (params.assetIn === 'FLR') {
+        // Native FLR -> Token
         swapHash = await writeContract(wagmiConfig, {
-          address: SPARKDEX_ROUTER as `0x${string}`,
-          abi: uniswapV2RouterAbi,
-          functionName: 'swapExactETHForTokens',
-          args: [amountOutMinBase, path, from as `0x${string}`, BigInt(deadline)],
+          address: poolAddress as `0x${string}`,
+          abi: simpleAMMAbi,
+          functionName: 'swap',
+          args: [tokenInAddress as `0x${string}`, amountInBase, minAmountOut],
           value: amountInBase,
           chain: null,
           account: from as `0x${string}`,
         })
-      } else if (params.assetOut === 'FLR') {
-        swapHash = await writeContract(wagmiConfig, {
-          address: SPARKDEX_ROUTER as `0x${string}`,
-          abi: uniswapV2RouterAbi,
-          functionName: 'swapExactTokensForETH',
-          args: [amountInBase, amountOutMinBase, path, from as `0x${string}`, BigInt(deadline)],
-          chain: null,
-          account: from as `0x${string}`,
-        })
       } else {
+        // Token -> Token or Token -> Native FLR
         swapHash = await writeContract(wagmiConfig, {
-          address: SPARKDEX_ROUTER as `0x${string}`,
-          abi: uniswapV2RouterAbi,
-          functionName: 'swapExactTokensForTokens',
-          args: [amountInBase, amountOutMinBase, path, from as `0x${string}`, BigInt(deadline)],
+          address: poolAddress as `0x${string}`,
+          abi: simpleAMMAbi,
+          functionName: 'swap',
+          args: [tokenInAddress as `0x${string}`, amountInBase, minAmountOut],
           chain: null,
           account: from as `0x${string}`,
         })
@@ -351,15 +362,14 @@ export class RealLarelSdk implements LarelSdk {
       console.log('[RealLarelSdk] Swap executed:', swapHash)
       
     } catch (error) {
-      console.warn('[RealLarelSdk] SparkDEX swap failed, using simulated swap:', error)
-      // Fallback: simulated swap (for testnet when SparkDEX is not available)
+      console.warn('[RealLarelSdk] AMM swap failed, using simulated swap:', error)
+      // Fallback: simulated swap
       swapHash = '0x' + Math.random().toString(16).slice(2, 66)
-      // Use a simple price ratio for simulation
       const priceRatio = inMeta.priceUsd / outMeta.priceUsd
       expectedOut = BigInt(Math.floor(Number(amountInBase) * priceRatio))
     }
     
-    // Step 4: Update shielded notes
+    // Update shielded notes
     const notes = loadNotes()
     const inputNote = notes.find(n => n.assetCode === params.assetIn && !n.spent)
     if (inputNote) {
