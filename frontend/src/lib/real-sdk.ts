@@ -237,29 +237,63 @@ export class RealLarelSdk implements LarelSdk {
   }
 
   async transfer(params: TransferParams): Promise<TxResult> {
-    console.log('[RealLarelSdk] transfer:', params.asset, params.amount)
-    const amountBase = toBaseUnits(params.amount, 18)
+    console.log('[RealLarelSdk] transfer:', params.asset, params.amount, 'to:', params.recipientKey)
+    
+    const meta = assetMeta(params.asset)
+    const amountBase = toBaseUnits(params.amount, meta.decimals)
     
     // Find source note
     const notes = loadNotes()
     const sourceNote = notes.find(n => n.assetCode === params.asset && !n.spent)
     if (!sourceNote) throw new Error(`No shielded ${params.asset} balance`)
     
+    const sourceAmount = BigInt(sourceNote.amount)
+    if (sourceAmount < amountBase) throw new Error('Insufficient balance')
+    
+    // Create output note for recipient (using recipient's owner key)
+    const recipientOwnerKey = BigInt(params.recipientKey.startsWith('0x') ? params.recipientKey : '0x' + params.recipientKey)
+    const outputNote = createNote({
+      assetId: BigInt(sourceNote.assetId),
+      amount: amountBase,
+      ownerKey: recipientOwnerKey,
+    })
+    
     // Mark source as spent
     markSpent(sourceNote.commitment)
     
-    // Create change note (if amount < note amount)
-    const noteAmount = BigInt(sourceNote.amount)
-    if (noteAmount > amountBase) {
+    // Create change note if needed
+    if (sourceAmount > amountBase) {
       const changeNote = createNote({
         assetId: BigInt(sourceNote.assetId),
-        amount: noteAmount - amountBase,
+        amount: sourceAmount - amountBase,
         spendingKey: getSpendingKey(),
       })
-      addNote(changeNote, { assetCode: params.asset, source: 'change' })
+      addNote(changeNote, { 
+        assetCode: params.asset, 
+        source: 'change',
+        decimals: meta.decimals 
+      })
     }
     
-    return { hash: '0x' + sourceNote.commitment.slice(2, 66) }
+    // In a real implementation, we would:
+    // 1. Generate ZK proof of ownership
+    // 2. Encrypt the note for the recipient
+    // 3. Submit on-chain transaction
+    
+    // For now, simulate the transfer
+    const txHash = '0x' + outputNote.commitment.toString(16).slice(0, 64)
+    
+    addHistoryItem({
+      id: 'tx_' + Date.now(),
+      type: 'Swap', // Using Swap type for transfers
+      pairOrAsset: params.asset,
+      amountIn: `${params.amount} ${params.asset}`,
+      txHash,
+      createdAt: Date.now(),
+    })
+    
+    console.log('[RealLarelSdk] transfer completed')
+    return { hash: txHash }
   }
 
   async placeOrder(params: PlaceOrderParams): Promise<PlaceOrderResult> {
