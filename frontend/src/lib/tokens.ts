@@ -55,21 +55,23 @@ export const CURATED_TOKENS: TokenMeta[] = [
     sac: sacEnv('XRP') ?? 'CCZV2PCLVCSFXIDOGE5N2TBC67CW3Y6JSTUIX5HKB4IU6C3O7KESB3IA' },
 ]
 
-const BRIDGED_META: TokenMeta[] = [
+export const BRIDGED_TOKENS: TokenMeta[] = [
   { code: 'bETH', name: 'Bridged ETH', icon: 'bETH', decimals: 18, priceUsd: 3500, bridged: true },
   { code: 'bUSDC', name: 'Bridged USDC', icon: 'bUSDC', decimals: 6, priceUsd: 1, bridged: true },
 ]
 
-const REGISTRY = new Map<string, TokenMeta>([...CURATED_TOKENS, ...BRIDGED_META].map((t) => [t.code, t]))
+const REGISTRY = new Map<string, TokenMeta>([...CURATED_TOKENS, ...BRIDGED_TOKENS].map((t) => [t.code, t]))
+
+export const ALL_TOKENS = [...CURATED_TOKENS, ...BRIDGED_TOKENS]
 
 /** The canonical token codes (the global "enum") used by deposit / transfer / swap pickers. */
-export const TOKEN_CODES: string[] = CURATED_TOKENS.map((t) => t.code)
+export const TOKEN_CODES: string[] = ALL_TOKENS.map((t) => t.code)
 
 /** Select options for the token pickers (code — name). */
-export const TOKEN_OPTIONS = CURATED_TOKENS.map((t) => ({ value: t.code, label: `${t.code} — ${t.name}` }))
+export const TOKEN_OPTIONS = ALL_TOKENS.map((t) => ({ value: t.code, label: `${t.code} — ${t.name}` }))
 
 /** Cross-chain bridged asset codes (minted by the bridge; not curated deposit tokens). */
-export const BRIDGED_ASSET_CODES: string[] = BRIDGED_META.map((t) => t.code)
+export const BRIDGED_ASSET_CODES: string[] = BRIDGED_TOKENS.map((t) => t.code)
 
 /** Metadata for a code — falls back to a plain text badge for unknown/custom tokens. */
 export function assetMeta(code: string): TokenMeta {
