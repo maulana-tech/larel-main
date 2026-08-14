@@ -226,32 +226,48 @@ export class RealLarelSdk implements LarelSdk {
   async swapShielded(params: SwapShieldedParams): Promise<TxResult> {
     console.log('[RealLarelSdk] swapShielded:', params.assetIn, '->', params.assetOut, 'amount:', params.amountIn)
     
-    // Simulate swap by withdrawing input and depositing output
-    const amountInBase = toBaseUnits(params.amountIn, 18)
-    const amountOutMinBase = toBaseUnits(params.amountOutMin, 18)
+    const inMeta = assetMeta(params.assetIn)
+    const outMeta = assetMeta(params.assetOut)
+    const amountInBase = toBaseUnits(params.amountIn, inMeta.decimals)
+    const amountOutMinBase = toBaseUnits(params.amountOutMin, outMeta.decimals)
     
     // Find input note
     const notes = loadNotes()
     const inputNote = notes.find(n => n.assetCode === params.assetIn && !n.spent)
     if (!inputNote) throw new Error(`No shielded ${params.assetIn} balance for swap`)
     
-    // Mark input note as spent
-    markSpent(inputNote.commitment)
-    
-    // Create output note (simulating the swap)
+    // Create output note FIRST (before marking input as spent)
     const outputNote = createNote({
-      assetId: assetIdFor({ native: params.assetOut === 'FLR', sac: assetMeta(params.assetOut).sac }),
+      assetId: assetIdFor({ native: outMeta.native, sac: outMeta.sac }),
       amount: amountOutMinBase,
       spendingKey: getSpendingKey(),
     })
     
+    // Only mark input as spent after output is created
+    markSpent(inputNote.commitment)
+    
     addNote(outputNote, { 
       assetCode: params.assetOut, 
       source: 'change',
-      decimals: assetMeta(params.assetOut).decimals 
+      decimals: outMeta.decimals 
     })
     
-    console.log('[RealLarelSdk] swap completed, output note created')
+    // Create change note if input amount > swap amount
+    const inputAmount = BigInt(inputNote.amount)
+    if (inputAmount > amountInBase) {
+      const changeNote = createNote({
+        assetId: BigInt(inputNote.assetId),
+        amount: inputAmount - amountInBase,
+        spendingKey: getSpendingKey(),
+      })
+      addNote(changeNote, { 
+        assetCode: params.assetIn, 
+        source: 'change',
+        decimals: inMeta.decimals 
+      })
+    }
+    
+    console.log('[RealLarelSdk] swap completed')
     return { hash: '0x' + outputNote.commitment.toString(16).slice(0, 64) }
   }
 
