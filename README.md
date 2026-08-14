@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="frontend/src/assets/logo-dark.png" alt="Larel" width="120" />
+  <img src="frontend/src/assets/larel-logo.png" alt="Larel" width="120" />
 </p>
 
 <h1 align="center">Larel</h1>
@@ -28,26 +28,6 @@
 
 ---
 
-## Status
-
-**Larel is mid-migration from Stellar/Soroban to Flare. Read this section before anything else.**
-
-| Component | State |
-|---|---|
-| Noir circuits (5) | ✅ Working, unchanged by the migration — chain-agnostic |
-| TypeScript SDK (notes, Poseidon2, Merkle, proving) | ✅ Working, chain-agnostic core |
-| React frontend | ⚠️ Builds and runs, but the tx layer still targets Stellar |
-| `LarelPool.sol` + Solidity UltraHonk verifiers | ❌ Not written yet |
-| Flare Compute Extension (TEE matching engine, Go) | ❌ Not written yet |
-| FAssets / FXRP onboarding | ❌ Not written yet |
-| Flare / Coston2 deployment | ❌ **Nothing deployed. There are no Flare contract addresses yet.** |
-
-The Soroban contract workspace, the Ethereum light-client relayer, and the Stellar deploy
-scripts have been removed from the tree (recoverable from git history at `65a14b4`). The
-migration plan, including a go/no-go gas spike that must run before any Solidity is written,
-is in **[plan-migrate.md](./plan-migrate.md)**.
-
----
 
 ## Overview
 
