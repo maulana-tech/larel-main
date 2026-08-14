@@ -1,13 +1,18 @@
 // @ts-nocheck
 import { sendTransaction, waitForTransactionReceipt, getAccount, writeContract, readContract } from '@wagmi/core'
 // @ts-nocheck
-import { Larel, type EvmOperation, type ProofData, type BalanceNote, createNote } from '@larel/sdk'
+import { Larel, type EvmOperation, type ProofData, type BalanceNote, createNote, fieldToHex, hash2, hash4 } from '@larel/sdk'
 // @ts-nocheck
 import { wagmiConfig } from './wagmi'
 // @ts-nocheck
-import { POOL_CONTRACT_ID } from './config'
+import { POOL_CONTRACT_ID, TRANSFER_PROCESSOR_ADDRESS } from './config'
 // @ts-nocheck
 import { getSpendingKey, addNote, loadNotes, markSpent, addOrder, loadOrders, setOrderStatus, loadHistory, addHistoryItem } from './note-store'
+
+// TransferProcessor ABI
+const transferProcessorAbi = parseAbi([
+  'function transfer(bytes calldata proof, bytes32[6] calldata publicInputs) external',
+])
 
 // SimpleAMM contract addresses on Coston2
 const AMM_POOLS: Record<string, string> = {
@@ -239,6 +244,7 @@ export class RealLarelSdk implements LarelSdk {
   async transfer(params: TransferParams): Promise<TxResult> {
     console.log('[RealLarelSdk] transfer:', params.asset, params.amount, 'to:', params.recipientKey)
     
+    const from = await this.requireAddress()
     const meta = assetMeta(params.asset)
     const amountBase = toBaseUnits(params.amount, meta.decimals)
     
@@ -258,42 +264,89 @@ export class RealLarelSdk implements LarelSdk {
       ownerKey: recipientOwnerKey,
     })
     
-    // Mark source as spent
-    markSpent(sourceNote.commitment)
-    
     // Create change note if needed
+    let changeNote = undefined
     if (sourceAmount > amountBase) {
-      const changeNote = createNote({
+      changeNote = createNote({
         assetId: BigInt(sourceNote.assetId),
         amount: sourceAmount - amountBase,
         spendingKey: getSpendingKey(),
       })
-      addNote(changeNote, { 
-        assetCode: params.asset, 
-        source: 'change',
-        decimals: meta.decimals 
-      })
     }
     
-    // In a real implementation, we would:
-    // 1. Generate ZK proof of ownership
-    // 2. Encrypt the note for the recipient
-    // 3. Submit on-chain transaction
+    // Generate ZK proof (simplified - in production this would use the real prover)
+    // For now, we'll submit a dummy proof that the mock verifier accepts
+    const nullifier0 = hash2(BigInt(sourceNote.commitment), BigInt(sourceNote.spendingKey))
+    const nullifier1 = hash2(0n, 0n) // dummy nullifier for second input
     
-    // For now, simulate the transfer
-    const txHash = '0x' + outputNote.commitment.toString(16).slice(0, 64)
+    const outCommitment0 = outputNote.commitment
+    const outCommitment1 = changeNote ? changeNote.commitment : 0n
     
-    addHistoryItem({
-      id: 'tx_' + Date.now(),
-      type: 'Swap', // Using Swap type for transfers
-      pairOrAsset: params.asset,
-      amountIn: `${params.amount} ${params.asset}`,
-      txHash,
-      createdAt: Date.now(),
-    })
+    // Public inputs: [merkle_root, nullifier_0, nullifier_1, out_commitment_0, out_commitment_1, ext_data_hash]
+    const merkleRoot = 0n // In production, this would be the actual Merkle root
+    const extDataHash = 0n // In production, this would hash recipient/fee data
     
-    console.log('[RealLarelSdk] transfer completed')
-    return { hash: txHash }
+    const publicInputs = [
+      fieldToHex(merkleRoot),
+      fieldToHex(nullifier0),
+      fieldToHex(nullifier1),
+      fieldToHex(outCommitment0),
+      fieldToHex(outCommitment1),
+      fieldToHex(extDataHash),
+    ] as `0x${string}`[]
+    
+    // Dummy proof (mock verifier accepts anything)
+    const dummyProof = '0x' + '00'.repeat(128) as `0x${string}`
+    
+    try {
+      // Submit transfer on-chain
+      console.log('[RealLarelSdk] Submitting ZK transfer on-chain...')
+      const txHash = await writeContract(wagmiConfig, {
+        address: TRANSFER_PROCESSOR_ADDRESS as `0x${string}`,
+        abi: transferProcessorAbi,
+        functionName: 'transfer',
+        args: [dummyProof, publicInputs],
+        chain: null,
+        account: from as `0x${string}`,
+      })
+      
+      await waitForTransactionReceipt(wagmiConfig as any, { hash: txHash })
+      console.log('[RealLarelSdk] Transfer TX:', txHash)
+      
+      // Mark source as spent
+      markSpent(sourceNote.commitment)
+      
+      // Store output notes
+      addNote(outputNote, { 
+        assetCode: params.asset, 
+        source: 'received',
+        decimals: meta.decimals,
+        txHash 
+      })
+      
+      if (changeNote) {
+        addNote(changeNote, { 
+          assetCode: params.asset, 
+          source: 'change',
+          decimals: meta.decimals 
+        })
+      }
+      
+      addHistoryItem({
+        id: 'tx_' + Date.now(),
+        type: 'Swap',
+        pairOrAsset: params.asset,
+        amountIn: `${params.amount} ${params.asset}`,
+        txHash,
+        createdAt: Date.now(),
+      })
+      
+      return { hash: txHash }
+      
+    } catch (error) {
+      console.error('[RealLarelSdk] Transfer failed:', error)
+      throw error
+    }
   }
 
   async placeOrder(params: PlaceOrderParams): Promise<PlaceOrderResult> {
