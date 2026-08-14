@@ -361,7 +361,8 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
   const from: Endpoint = direction === 'deposit' ? l1 : 'larel'
   const to: Endpoint = direction === 'deposit' ? 'larel' : l1
 
-  const ethToken = CURATED_TOKENS.find(t => t.code === 'ETH')!
+  const [ethOriginCode, setEthOriginCode] = useState('ETH')
+  const ethToken = CURATED_TOKENS.find(t => t.code === ethOriginCode)!
 
   // Deposit-from-Stellar token: any curated token (with a SAC here) or a custom SAC address.
   const [depositToken, setDepositToken] = useState<TokenMeta>(() => depositableTokens()[0] ?? CURATED_TOKENS[0]!)
@@ -418,8 +419,8 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
   const amountValid = isPositiveAmount(amount)
 
   // Token codes shown in the From / To panels.
-  const depositCode = l1 === 'stellar' ? depositToken.code : 'ETH'
-  const shieldedCode = l1 === 'stellar' ? depositToken.code : 'bETH'
+  const depositCode = l1 === 'stellar' ? depositToken.code : ethToken.code
+  const shieldedCode = l1 === 'stellar' ? depositToken.code : `b${ethToken.code}`
   const fromCode = direction === 'deposit' ? depositCode : selectedNote?.assetCode ?? '—'
   const toCode = direction === 'deposit'
     ? shieldedCode
@@ -738,6 +739,19 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
                       <option value="__custom__" className="bg-ink-850">
                         Custom…
                       </option>
+                    </select>
+                  </div>
+                ) : direction === 'deposit' ? (
+                  <div className="inline-flex shrink-0 items-center gap-2 rounded-none border border-ink-700 bg-ink-850 px-2.5 py-2">
+                    <CoinBadge name={ethOriginCode} size="sm" />
+                    <select
+                      className="cursor-pointer appearance-none bg-transparent text-sm font-semibold text-zinc-100 focus:outline-none"
+                      value={ethOriginCode}
+                      onChange={(e) => setEthOriginCode(e.target.value)}
+                      disabled={running}
+                    >
+                      <option value="ETH" className="bg-ink-850">ETH</option>
+                      <option value="USDC" className="bg-ink-850">USDC</option>
                     </select>
                   </div>
                 ) : (
