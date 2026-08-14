@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Act } from '../components/Act'
 import { useSettings, useT, type Locale, type DisplayCurrency } from '../lib/settings'
 import { useTheme } from '../hooks/useTheme'
-import { POOL_CONTRACT_ID, NATIVE_SAC } from '../lib/config'
+import { POOL_CONTRACT_ID } from '../lib/config'
 import { cx } from '../lib/cx'
 
 export function SettingsPage() {
@@ -11,7 +11,6 @@ export function SettingsPage() {
   const t = useT()
 
   const [copiedPool, setCopiedPool] = useState(false)
-  const [copiedSac, setCopiedSac] = useState(false)
 
   const copyToClipboard = (text: string, setter: (val: boolean) => void) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -166,22 +165,18 @@ export function SettingsPage() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-xs font-mono uppercase tracking-wider text-spectral/50">
-              Native SAC (FLR)
-            </label>
-            <div className="flex items-center gap-2 rounded-none border border-spectral/8 bg-ink-950/30 px-3 py-2">
-              <span className="font-mono text-xs text-spectral/75 select-all truncate flex-1">
-                {NATIVE_SAC}
+          <div className="rounded-none border border-spectral/8 bg-ink-950/30 p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono uppercase tracking-wider text-spectral/50">
+                Chain
               </span>
-              <button
-                type="button"
-                onClick={() => copyToClipboard(NATIVE_SAC, setCopiedSac)}
-                className="text-[11px] font-mono uppercase tracking-wider text-patina-400/80 hover:text-patina-400 px-2 py-1 hover:bg-patina-400/5 rounded-none transition shrink-0"
-              >
-                {copiedSac ? t('settings.copied') : t('settings.copy')}
-              </button>
+              <span className="rounded-none bg-patina-400/10 px-2 py-0.5 font-mono text-xs font-semibold text-patina-400">
+                Flare Coston2
+              </span>
             </div>
+            <p className="text-[11px] leading-relaxed text-spectral/40">
+              EVM-compatible testnet. Native token: FLR.
+            </p>
           </div>
         </section>
 
