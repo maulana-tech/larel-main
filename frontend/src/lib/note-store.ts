@@ -146,7 +146,8 @@ import { CURATED_TOKENS } from './tokens'
 export function loadNotes(): StoredNote[] {
   const notes = read<StoredNote[]>(notesStorageKey(), [])
   const currentUsdc = CURATED_TOKENS.find((t) => t.code === 'USDC')?.sac
-  if (currentUsdc && notes.some((n) => n.assetCode === 'USDC' && n.assetAddress !== currentUsdc)) {
+  // Only clear if there are USDC notes with a DEFINED but DIFFERENT address
+  if (currentUsdc && notes.some((n) => n.assetCode === 'USDC' && n.assetAddress && n.assetAddress !== currentUsdc)) {
     console.warn("Detected deprecated USDC notes in cache. Clearing notes and reloading...")
     clearAllNotes()
     globalThis.location.reload()
