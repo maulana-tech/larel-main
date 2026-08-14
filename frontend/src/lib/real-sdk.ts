@@ -474,7 +474,10 @@ export class RealLarelSdk implements LarelSdk {
       // Fallback: simulated swap
       swapHash = '0x' + Math.random().toString(16).slice(2, 66)
       const priceRatio = inMeta.priceUsd / outMeta.priceUsd
-      expectedOut = BigInt(Math.floor(Number(amountInBase) * priceRatio))
+      // Convert to human units first, then apply price, then convert to output base units
+      const amountInHuman = baseUnitsToNumber(amountInBase, inMeta.decimals)
+      const amountOutHuman = amountInHuman * priceRatio
+      expectedOut = toBaseUnits(amountOutHuman.toFixed(outMeta.decimals), outMeta.decimals)
     }
     
     // Update shielded notes
