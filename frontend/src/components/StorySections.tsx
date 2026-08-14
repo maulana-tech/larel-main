@@ -19,7 +19,7 @@ function Tile({ className = '', children }: { className?: string; children: Reac
   const dark = useIsDark()
   return (
     <div
-      className={`relative flex flex-col justify-between overflow-hidden border border-[#191919]/10 dark:border-[#f2f2f2]/10 p-6 transition-colors duration-300 hover:border-[#7a7a7a]/25 dark:hover:border-[#bfbfbf]/25 ${className}`}
+      className={`relative flex flex-col justify-between overflow-hidden border border-[#191919]/10 dark:border-[#f2f2f2]/10 p-6 transition-colors duration-300 hover:border-red-500 dark:hover:border-red-500 ${className}`}
       style={{ background: dark ? 'rgba(242,242,242,0.045)' : 'rgba(25,25,25,0.03)' }}
     >
       {children}
