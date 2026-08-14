@@ -29,4 +29,10 @@ This document tracks the deployed smart contract addresses for the Larel protoco
 | **FLR/XRP** | `0xD0aCae33a7c4eB3b2A3Ce1bb3f2fc489e6B40B8e` | FLR ↔ XRP swap pool |
 | **USDC/ETH** | `0x8A28b7F3448f75789c9D6ff5f0E5DdC59C744e98` | USDC ↔ ETH swap pool |
 
+### ZK Transfer
+| Contract | Address | Description |
+|---|---|---|
+| **MockTransferVerifier** | `0x6edc1c62e6b0110a00c6c28a7b54904ab856cffb` | Mock verifier (always true) for testing |
+| **TransferProcessor** | `0x6258f86d8c4931bfc1ac1bd779f912d2a4288faa` | Processes ZK transfer proofs |
+
 *Deployed on: August 14, 2026*
