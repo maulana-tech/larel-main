@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useWallet } from '../hooks/useWallet'
 import { CURATED_TOKENS } from '../lib/tokens'
 import { faucetMint } from '../lib/faucet'
@@ -22,7 +22,7 @@ export function Faucet() {
   const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient()
   const [busy, setBusy] = useState<string | null>(null)
-  const [msg, setMsg] = useState<Record<string, string>>({})
+  const [msg, setMsg] = useState<Record<string, ReactNode>>({})
   const connected = wallet.status === 'connected'
   const onCoston2 = chainId === flareTestnet.id
 
@@ -35,7 +35,8 @@ export function Faucet() {
     setMsg((m) => ({ ...m, [code]: '' }))
     try {
       const hash = await faucetMint(sac, BigInt(DRIP) * 10n ** BigInt(decimals), walletClient, publicClient)
-      setMsg((m) => ({ ...m, [code]: `Minted ${DRIP.toLocaleString()} ${code} · ${truncateKey(hash, 6, 6)}` }))
+      const explorerUrl = `https://coston2-explorer.flare.network/tx/${hash}`
+      setMsg((m) => ({ ...m, [code]: <span>Minted {DRIP.toLocaleString()} {code} · <a href={explorerUrl} target="_blank" rel="noreferrer" className="text-spectral-soft hover:underline">{truncateKey(hash, 6, 6)}</a></span> }))
     } catch (e) {
       console.error(e)
       const errMsg = e instanceof Error ? e.message : 'Mint failed.'
