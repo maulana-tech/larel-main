@@ -5,11 +5,6 @@
  * here (a typed config) so the app does not need filesystem access outside its own root,
  * and every value can be overridden at build time via `VITE_*` env vars for other
  * networks / private deployments.
- *
- * deployments.json (testnet):
- *   pool        CBZNNVUKTG6YSVT3NGV7MDVL5ZQO5D4KLLIRFAGBCORPH7Q62ZHS5RP3
- *   native SAC  CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
- *   passphrase  "Test SDF Network ; September 2015"
  */
 import { hash2, NATIVE_ASSET_ID, toField, type Field } from '@larel/sdk'
 import type { AssetCode } from './larel-sdk'
@@ -33,42 +28,51 @@ function flag(key: string): boolean {
  *
  * Points at the Larel rebranded redeploy (2026-07-15): the pool + all 5 verifiers were rebuilt
  * from the lax-stell source (LarelPool/LarelError symbols) on a fresh tree, reusing the
- * existing faucet SACs. `transfer` AND `match_orders` carry encrypted note payloads (+ full leaf
- * set/indices) in their events, which the recipient's indexer scans to auto-discover incoming
- * notes and settlement fills. Prior pools: match-memo (Wraith build) CA2CI7VKG27V3FIXD3OYXFYTN33DMI5QR4WFBX3N5SRC6JWEO3AWDILD,
- * memo pool CBVM7B622FSW47FDNUVU7GEU7TNRVRWEVOTNAUWVUOHFMIPSTDL2YVNG,
- * pre-memo pool CD7EF4GG32IPVS2PGD2LMXEO3TPEWBZRUCBBSPXQ236CD6TMF5S4UUZR.
+ * existing faucet SACs.
  */
 export const POOL_CONTRACT_ID = env(
   'VITE_LAREL_POOL',
-  '0x16dCC523fa9F57C08b0D7B3AD92Ec6cE7819A6Cb',
+  '0x72a86479837B87cc2aA73daBd7B54CB4DBf0AB84',
 )
 
-/** Native (FLR) Flare Asset Contract address. */
-export const NATIVE_SAC = env(
-  'VITE_NATIVE_SAC',
-  'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC',
-)
+// ---------------------------------------------------------------------------
+// Mock ERC20 token addresses on Flare Coston2
+//
+// These are the EVM addresses of the permissionless-mint MockERC20 contracts
+// deployed for the faucet. Deploy with: cd contracts && forge script script/Deploy.s.sol
+// After deployment, paste the addresses here or set VITE_*_SAC env vars.
+// ---------------------------------------------------------------------------
 
-/** Soroban RPC endpoint (Testnet by default). */
+/** Mock USDC ERC20 on Coston2 (7 decimals). */
+export const MOCK_USDC_ADDRESS = env('VITE_USDC_SAC', '0x450FB6d0f985F23c1E0F03a0c5848B7dc7Fec187')
+
+/** Mock ETH ERC20 on Coston2 (7 decimals). */
+export const MOCK_ETH_ADDRESS = env('VITE_ETH_SAC', '0xc5D56f02c1DaE4f13b2A6a00C2ef3C8E63f4B6F6')
+
+/** Mock BTC ERC20 on Coston2 (7 decimals). */
+export const MOCK_BTC_ADDRESS = env('VITE_BTC_SAC', '0xE67A87b2eCBbE03B90cac2cA3C494a3e1be5f615')
+
+/** Mock XRP ERC20 on Coston2 (7 decimals). */
+export const MOCK_XRP_ADDRESS = env('VITE_XRP_SAC', '0xaCB12755134900196F8eE4Ae5223e6955B8Aa7Af')
+
+/** Whether all mock ERC20 tokens are deployed and configured. */
+export const MOCK_TOKENS_DEPLOYED = Boolean(MOCK_USDC_ADDRESS) && Boolean(MOCK_ETH_ADDRESS)
+
+/** Flare Coston2 RPC endpoint. */
 export const SOROBAN_RPC_URL = env('VITE_SOROBAN_RPC_URL', 'https://soroban-testnet.stellar.org')
 
 /** Off-chain dark-pool matcher base URL (e.g. http://localhost:8787). Empty = matching
  *  disabled: orders still place + cancel on-chain, they just won't be matched/filled. */
 export const MATCHER_URL = env('VITE_MATCHER_URL', '')
 
-/** Ledger the pool was deployed at — the client indexer's cold-start floor (clamped to the
- *  RPC's event-retention window, so older history is unavailable). */
+/** Ledger the pool was deployed at — the client indexer's cold-start floor. */
 export const POOL_DEPLOY_LEDGER = Number(env('VITE_POOL_DEPLOY_LEDGER', '3858200'))
 
-/** Stellar network passphrase. */
+/** Flare network passphrase. */
 export const NETWORK_PASSPHRASE = env('VITE_NETWORK_PASSPHRASE', 'Test SDF Network ; September 2015')
 
 /** When true, the app uses the offline `MockLarelSdk` instead of the live client. */
 export const USE_MOCK = flag('VITE_USE_MOCK')
-
-/** Optional USDC SAC address — not part of the single-asset testnet demo. */
-export const USDC_SAC = env('VITE_USDC_SAC', '')
 
 /** Soroban LarelSwapRouter contract id. */
 export const SWAP_ROUTER_CONTRACT_ID = env(
@@ -83,22 +87,17 @@ export const SOROSWAP_ROUTER_ADDRESS = env(
 )
 
 // ---------------------------------------------------------------------------
-// Cross-chain bridge (Ethereum Sepolia <-> Stellar). BRIDGE_SPEC §3/§7/§9.
-//
-// PLACEHOLDER addresses below ship with the app so the Bridge tab type-checks,
-// builds, and runs in mock mode TODAY. Fill the `VITE_BRIDGE_*` env vars (or edit
-// these defaults) with the real deployed addresses to take it live. Until the L1
-// bridge + Soroban light-client/bridge contracts are deployed, the live reads
-// fail gracefully and the UI shows a "simulated" light-client head.
+// Cross-chain bridge (Ethereum Sepolia <-> Flare Coston2).
 // ---------------------------------------------------------------------------
 
-/** When true, the Bridge tab runs a self-contained mock walkthrough (no wallets). */
+/** When true, the Bridge tab runs a self-contained mock walkthrough (no wallets).
+ *  Auto-enabled when bridge addresses are not configured. */
 export const USE_MOCK_BRIDGE = USE_MOCK || flag('VITE_USE_MOCK_BRIDGE')
 
 /** Ethereum chain the L1 bridge is deployed on (Sepolia testnet = 11155111). */
 export const L1_CHAIN_ID = Number(env('VITE_L1_CHAIN_ID', '11155111'))
 
-/** Sepolia execution RPC used by viem reads (eth_getProof is done by the relayer). */
+/** Sepolia execution RPC used by viem reads. */
 export const SEPOLIA_RPC_URL = env('VITE_SEPOLIA_RPC_URL', 'https://ethereum-sepolia-rpc.publicnode.com')
 
 /** `LarelBridgeL1` escrow address on Sepolia (locks/unlocks the backing). */
@@ -107,26 +106,33 @@ export const L1_BRIDGE_ADDRESS = env(
   '0x0000000000000000000000000000000000000000',
 )
 
-/** Soroban `EthLightClient` contract id (trusted Ethereum head on Stellar). */
+/** Soroban `EthLightClient` contract id (trusted Ethereum head on Flare). */
 export const ETH_LIGHT_CLIENT_ID = env('VITE_ETH_LIGHT_CLIENT', '')
 
 /** Soroban `LarelBridge` contract id (bridge_in / bridge_out). */
 export const LAREL_BRIDGE_ID = env('VITE_LAREL_BRIDGE', '')
 
-/**
- * Optional relayer base URL. If set, `requestBridgeIn` POSTs the commitment to nudge
- * the relayer; otherwise the UI just polls the Stellar `BridgeInEvent` (the relayer
- * watches L1 `Locked` events on its own — BRIDGE_SPEC §8).
- */
+/** Relayer base URL. */
 export const RELAYER_URL = env('VITE_RELAYER_URL', '')
 
 /**
  * Bridge-asset domain separator (BRIDGE_SPEC §3):
  *   asset_id(bToken) = hash2( hash2(eth_chain_id, eth_token_address_as_field), BRIDGE_DOMAIN )
- * The numeric domain is not pinned by the spec; this default is deterministic and
- * overridable so it can be aligned with the contract when the derivation lands on-chain.
  */
 export const BRIDGE_DOMAIN: Field = toField(env('VITE_BRIDGE_DOMAIN', '0x627269646765')) // "bridge"
+
+/** Whether the live bridge contracts are configured (non-zero addresses + IDs). */
+export const BRIDGE_CONFIGURED =
+  L1_BRIDGE_ADDRESS.toLowerCase() !== '0x0000000000000000000000000000000000000000' &&
+  Boolean(ETH_LIGHT_CLIENT_ID) &&
+  Boolean(LAREL_BRIDGE_ID)
+
+/**
+ * Effective mock-bridge flag: true when USE_MOCK is on, VITE_USE_MOCK_BRIDGE is set,
+ * OR the live bridge contracts are not configured. This ensures the bridge UI is always
+ * usable — in mock mode when live addresses aren't available.
+ */
+export const EFFECTIVE_MOCK_BRIDGE = USE_MOCK_BRIDGE || !BRIDGE_CONFIGURED
 
 /** Map a 20-byte L1 token address (hex) to its bridged Larel `asset_id` field. */
 export function deriveBridgedAssetId(tokenAddressHex: string): Field {
@@ -140,31 +146,34 @@ export const ETH_L1_ADDRESS = '0x0000000000000000000000000000000000000000'
 /** Sepolia test-USDC (Circle faucet token) — override via env for other deployments. */
 export const USDC_L1_ADDRESS = env('VITE_BRIDGE_USDC_L1', '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238')
 
+/** Sepolia test-WBTC — override via env. Placeholder: not deployed yet. */
+export const BTC_L1_ADDRESS = env('VITE_BRIDGE_BTC_L1', '0x0000000000000000000000000000000000000000')
+
+/** Sepolia test-XRP — override via env. Placeholder: not deployed yet. */
+export const XRP_L1_ADDRESS = env('VITE_BRIDGE_XRP_L1', '0x0000000000000000000000000000000000000000')
+
 /** Per-asset on-chain config. `assetId` is the in-circuit field id (native FLR = 0). */
 export interface AssetConfig {
   code: AssetCode
   /** Field identifier used in notes/commitments. */
   assetId: Field
-  /** SAC contract address (StrKey "C…"), or undefined if not deployed on this network. */
+  /** ERC20 contract address on Coston2, or undefined if not deployed on this network. */
   sac: string | undefined
-  /** On-chain fixed-point decimals (wei for FLR = 18). */
+  /** On-chain fixed-point decimals. */
   decimals: number
   /** Display price estimate (USD), portfolio only. */
   priceUsd: number
 }
 
 export const ASSET_CONFIG: Record<AssetCode, AssetConfig> = {
-  FLR: { code: 'FLR', assetId: NATIVE_ASSET_ID, sac: NATIVE_SAC, decimals: 18, priceUsd: 0.03 },
+  FLR: { code: 'FLR', assetId: NATIVE_ASSET_ID, sac: undefined, decimals: 18, priceUsd: 0.03 },
   USDC: {
     code: 'USDC',
-    // Derived from the SAC address when configured; otherwise a placeholder id.
-    assetId: USDC_SAC ? toField(BigInt(USDC_SAC)) : 0n,
-    sac: USDC_SAC || undefined,
+    assetId: MOCK_USDC_ADDRESS ? toField(BigInt(MOCK_USDC_ADDRESS)) : 0n,
+    sac: MOCK_USDC_ADDRESS || undefined,
     decimals: 7,
     priceUsd: 1,
   },
-  // Bridged assets: no Stellar SAC (the backing lives in the L1 escrow). The
-  // `assetId` follows BRIDGE_SPEC §3 so the minted note interoperates with the pool.
   bETH: {
     code: 'bETH',
     assetId: deriveBridgedAssetId(ETH_L1_ADDRESS),
@@ -178,5 +187,19 @@ export const ASSET_CONFIG: Record<AssetCode, AssetConfig> = {
     sac: undefined,
     decimals: 6,
     priceUsd: 1,
+  },
+  bBTC: {
+    code: 'bBTC',
+    assetId: deriveBridgedAssetId(BTC_L1_ADDRESS),
+    sac: undefined,
+    decimals: 8,
+    priceUsd: 65000,
+  },
+  bXRP: {
+    code: 'bXRP',
+    assetId: deriveBridgedAssetId(XRP_L1_ADDRESS),
+    sac: undefined,
+    decimals: 6,
+    priceUsd: 0.6,
   },
 }
