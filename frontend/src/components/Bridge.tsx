@@ -615,7 +615,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
     if (direction === 'deposit') {
       if (l1 === 'flare') {
         if (resolvingCustom) return { label: 'Resolving token…', onClick: () => {}, disabled: true }
-        if (!depositToken.sac)
+        if (!depositToken.native && !depositToken.sac)
           return { label: `${depositToken.code} not available here`, onClick: () => {}, disabled: true }
         if (!amountValid) return { label: 'Enter an amount', onClick: () => {}, disabled: true }
         return { label: `Deposit ${depositToken.code}`, onClick: () => void run() }
