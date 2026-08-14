@@ -73,13 +73,16 @@ export class RealLarelSdk implements LarelSdk {
   }
 
   async deposit(params: DepositParams): Promise<TxResult> {
+    console.log('[RealLarelSdk] deposit called:', params.asset, params.amount)
     const isNative = params.native ?? (params.asset === 'FLR')
     const address = params.sac ?? (isNative ? 'native' : '')
     if (!address && !isNative) throw new Error('Need ERC20 contract address for deposit')
     const decimals = params.decimals ?? 18
     const amountBase = toBaseUnits(params.amount, decimals)
+    console.log('[RealLarelSdk] isNative:', isNative, 'address:', address)
 
     const from = await this.requireAddress()
+    console.log('[RealLarelSdk] wallet address:', from)
 
     // For ERC20 tokens, approve the pool to spend first
     if (!isNative && address && address !== 'native') {
