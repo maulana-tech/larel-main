@@ -146,7 +146,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
               >
                 <div className="grid w-full grid-cols-1 items-center gap-x-12 gap-y-8 md:grid-cols-2">
                   <div className={`mx-auto w-[clamp(210px,32vw,380px)] ${s.flip ? 'md:order-1' : 'md:order-2'}`}>
-                    <LoopAsset src={s.src} poster={s.poster} className="block w-full" />
+                    <LoopAsset src={s.src} poster={s.poster} className="block w-full h-auto max-h-[45vh] object-contain" />
                   </div>
                   <div className={`max-w-md ${s.flip ? 'md:order-2' : 'md:order-1'}`}>
                     <Label>
