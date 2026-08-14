@@ -138,15 +138,15 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
             {STACK.map((s) => (
               <ScrollStackItem
                 key={s.n}
-                itemClassName={`flex min-h-[72vh] items-center rounded-none-[1.75rem] border px-6 py-12 sm:px-14 sm:py-16 transition-colors duration-300 ${
+                itemClassName={`flex min-h-[60vh] items-center rounded-none border px-6 py-8 sm:px-12 sm:py-10 transition-colors duration-300 ${
                   dark
                     ? 'border-[#f2f2f2]/10 bg-[#1c1c1c] shadow-[0_30px_80px_-32px_rgba(0,0,0,0.6)]'
                     : 'border-[#191919]/10 bg-[#f7f7f7] shadow-[0_30px_80px_-32px_rgba(25,25,25,0.15)]'
                 }`}
               >
                 <div className="grid w-full grid-cols-1 items-center gap-x-12 gap-y-8 md:grid-cols-2">
-                  <div className={`mx-auto w-[clamp(210px,32vw,380px)] ${s.flip ? 'md:order-1' : 'md:order-2'}`}>
-                    <LoopAsset src={s.src} poster={s.poster} className="block w-full h-auto max-h-[45vh] object-contain" />
+                  <div className={`mx-auto w-[clamp(180px,28vw,320px)] ${s.flip ? 'md:order-1' : 'md:order-2'}`}>
+                    <LoopAsset src={s.src} poster={s.poster} className="block w-full h-auto max-h-[32vh] object-contain" />
                   </div>
                   <div className={`max-w-md ${s.flip ? 'md:order-2' : 'md:order-1'}`}>
                     <Label>
