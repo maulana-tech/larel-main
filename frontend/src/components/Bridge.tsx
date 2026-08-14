@@ -7,13 +7,15 @@ import { useEvmWallet } from '../hooks/useEvmWallet'
 import { useWallet } from '../hooks/useWallet'
 import { addNote, getSpendingKey, loadNotes, markSpent, type StoredNote } from '../lib/note-store'
 import { baseUnitsToNumber, toBaseUnits } from '../lib/real-sdk'
-import { formatAmount, isPositiveAmount, isValidStellarAddress, truncateKey } from '../lib/format'
+import { formatAmount, isPositiveAmount, isValidFlareAddress, truncateKey } from '../lib/format'
 import {
   ETH_LIGHT_CLIENT_ID,
   L1_BRIDGE_ADDRESS,
   USE_MOCK,
   USE_MOCK_BRIDGE,
+  EFFECTIVE_MOCK_BRIDGE,
   LAREL_BRIDGE_ID,
+  BRIDGE_CONFIGURED,
 } from '../lib/config'
 import {
   assetMeta,
@@ -33,8 +35,9 @@ import {
   readLightClientHead,
   requestBridgeIn,
   sepoliaTxUrl,
-  stellarContractUrl,
+  flareContractUrl,
 } from '../lib/bridge'
+import { BRIDGED_TOKENS } from '../lib/tokens'
 import { cx } from '../lib/cx'
 import {
   Button,
@@ -52,29 +55,29 @@ import { CoinBadge } from './BrandIcons'
 // ---------------------------------------------------------------------------
 // Endpoints & routing
 //
-// The Deposit surface moves value between an external Layer-1 (Stellar or Ethereum)
+// The Deposit surface moves value between an external Layer-1 (Flare or Ethereum)
 // and the Larel shielded pool, in either direction:
 //   • deposit  = L1 → Larel   (fund the pool)
 //   • withdraw = Larel → L1   (redeem back out)
 // The Larel side is always fixed; the L1 side is a chain picker.
 // ---------------------------------------------------------------------------
 
-type L1 = 'stellar' | 'ethereum'
+type L1 = 'flare' | 'ethereum'
 type Endpoint = L1 | 'larel'
 type Direction = 'deposit' | 'withdraw'
 
 const ENDPOINT_META: Record<Endpoint, { label: string; sub: string; icon: string }> = {
-  stellar: { label: 'Flare', sub: 'Coston2', icon: 'flare' },
+  flare: { label: 'Flare', sub: 'Coston2', icon: 'flare' },
   ethereum: { label: 'Ethereum', sub: 'Sepolia', icon: 'ethereum' },
   larel: { label: 'Larel', sub: 'Shielded pool', icon: 'larel' },
 }
 
-const L1_CHAINS: L1[] = ['stellar', 'ethereum']
+const L1_CHAINS: L1[] = ['flare', 'ethereum']
 
 /** The L1-native token that enters/leaves each external chain (code = CoinBadge name). */
-const L1_TOKEN: Record<L1, string> = { stellar: 'FLR', ethereum: 'ETH' }
+const L1_TOKEN: Record<L1, string> = { flare: 'FLR', ethereum: 'ETH' }
 
-/** Notes withdrawable back to each chain: bridged notes go to Ethereum, the rest to Stellar. */
+/** Notes withdrawable back to each chain: bridged notes go to Ethereum, the rest to Flare. */
 function isWithdrawableTo(l1: L1, code: string): boolean {
   const bridged = BRIDGED_ASSET_CODES.includes(code)
   return l1 === 'ethereum' ? bridged : !bridged
@@ -88,9 +91,9 @@ function l1TokenFor(code: string): string {
 }
 
 const STEP_LABELS: Record<string, string[]> = {
-  'deposit:stellar': ['Submit deposit on Flare', 'Shielded note minted'],
+  'deposit:flare': ['Submit deposit on Flare', 'Shielded note minted'],
   'deposit:ethereum': ['Lock on Sepolia', 'Header finalized', 'Inclusion proven', 'Minted on Flare'],
-  'withdraw:stellar': ['Prove ownership (ZK)', 'Released on Flare'],
+  'withdraw:flare': ['Prove ownership (ZK)', 'Released on Flare'],
   'withdraw:ethereum': ['Prove ownership', 'Burn note on Flare', 'Unlock authorized', 'Released on Sepolia'],
 }
 
@@ -101,7 +104,10 @@ const STEP_LABELS: Record<string, string[]> = {
 const MAX_U64 = 1n << 64n
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 const isEvmAddress = (s: string) => /^0x[0-9a-fA-F]{40}$/.test(s.trim())
-const stellarTxUrl = (hash: string) => `https://stellar.expert/explorer/testnet/tx/${hash}`
+const flareTxUrl = (hash: string) => `https://coston2-explorer.flare.network/tx/${hash}`
+
+/** L1 tokens available for Ethereum bridge deposits. */
+const ETH_BRIDGE_OPTIONS = BRIDGE_TOKENS.map((t) => t.code)
 
 /** A stored note's amount as a human string (base units -> decimal). */
 function noteHuman(n: StoredNote): string {
@@ -126,14 +132,9 @@ async function pollUntil(
   }
 }
 
-/** A believable, slowly-advancing Sepolia head used when the light client isn't deployed. */
+/** simulated advancing Sepolia head used when the light client isn't deployed. */
 const simulatedHeadBlock = (): bigint =>
   8_900_000n + BigInt(Math.floor(Date.now() / 12_000) % 50_000)
-
-const BRIDGE_CONFIGURED =
-  L1_BRIDGE_ADDRESS.toLowerCase() !== '0x0000000000000000000000000000000000000000' &&
-  Boolean(ETH_LIGHT_CLIENT_ID) &&
-  Boolean(LAREL_BRIDGE_ID)
 
 type FlowStatus = 'idle' | 'running' | 'done' | 'error'
 type StepState = 'pending' | 'active' | 'done' | 'error'
@@ -201,7 +202,7 @@ function TxLink({ href, label }: { href: string; label: string }) {
 /** Compact provenance strip — the trusted Ethereum head the bridge verifies against. */
 function ProvenanceStrip() {
   const [head, setHead] = useState<LightClientHead | null>(null)
-  const simulated = USE_MOCK_BRIDGE || !ETH_LIGHT_CLIENT_ID
+  const simulated = EFFECTIVE_MOCK_BRIDGE || !ETH_LIGHT_CLIENT_ID
 
   useEffect(() => {
     let cancelled = false
@@ -250,7 +251,7 @@ function ChainIdentity({ endpoint }: { endpoint: Endpoint }) {
   )
 }
 
-/** The L1 chain picker (Stellar / Ethereum) shown on the external side. */
+/** The L1 chain picker (Flare / Ethereum) shown on the external side. */
 function ChainSelect({
   value,
   onChange,
@@ -354,9 +355,9 @@ function TokenChip({ code }: { code: string }) {
 export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgress?: (p: BridgeProgress) => void } = {}) {
   const { sdk, refreshBalances, identityReady } = useLarel()
   const evm = useEvmWallet()
-  const stellar = useWallet()
+  const flare = useWallet()
 
-  const [l1, setL1] = useState<L1>('stellar')
+  const [l1, setL1] = useState<L1>('flare')
   const [direction, setDirection] = useState<Direction>('deposit')
   const from: Endpoint = direction === 'deposit' ? l1 : 'larel'
   const to: Endpoint = direction === 'deposit' ? 'larel' : l1
@@ -364,7 +365,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
   const [ethOriginCode, setEthOriginCode] = useState('ETH')
   const ethToken = CURATED_TOKENS.find(t => t.code === ethOriginCode)!
 
-  // Deposit-from-Stellar token: any curated token (with a SAC here) or a custom SAC address.
+  // Deposit-from-Flare token: any curated token (with an ERC20 address here) or a custom address.
   const [depositToken, setDepositToken] = useState<TokenMeta>(() => depositableTokens()[0] ?? CURATED_TOKENS[0]!)
   const [customMode, setCustomMode] = useState(false)
   const [customSac, setCustomSac] = useState('')
@@ -411,7 +412,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
   const [step, setStep] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [l1Hash, setL1Hash] = useState<string | null>(null)
-  const [stellarHash, setStellarHash] = useState<string | null>(null)
+  const [flareHash, setFlareHash] = useState<string | null>(null)
   const cancelledRef = useRef(false)
   useEffect(() => () => void (cancelledRef.current = true), [])
 
@@ -419,8 +420,8 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
   const amountValid = isPositiveAmount(amount)
 
   // Token codes shown in the From / To panels.
-  const depositCode = l1 === 'stellar' ? depositToken.code : ethToken.code
-  const shieldedCode = l1 === 'stellar' ? depositToken.code : `b${ethToken.code}`
+  const depositCode = l1 === 'flare' ? depositToken.code : ethToken.code
+  const shieldedCode = l1 === 'flare' ? depositToken.code : `b${ethToken.code}`
   const fromCode = direction === 'deposit' ? depositCode : selectedNote?.assetCode ?? '—'
   const toCode = direction === 'deposit'
     ? shieldedCode
@@ -431,7 +432,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
   const steps = STEP_LABELS[`${direction}:${l1}`]
 
   // Additive: let a host surface (Act 01) mirror the crossing. Default no-op — the
-  // live Stellar/Ethereum deposit + withdraw paths are byte-for-byte unchanged.
+  // live Flare/Ethereum deposit + withdraw paths are byte-for-byte unchanged.
   useEffect(() => {
     onProgress?.({ step, total: steps.length, status })
   }, [step, status, steps.length, onProgress])
@@ -441,14 +442,14 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
     setStep(0)
     setError(null)
     setL1Hash(null)
-    setStellarHash(null)
+    setFlareHash(null)
     setAmount('')
     setRecipient('')
   }
 
-  // Withdraw defaults to the connected wallet's own Stellar account.
+  // Withdraw defaults to the connected wallet's own Flare account.
   function defaultRecipient(dir: Direction, chain: L1): string {
-    return dir === 'withdraw' && chain === 'stellar' && stellar.address ? stellar.address : ''
+    return dir === 'withdraw' && chain === 'flare' && flare.address ? flare.address : ''
   }
 
   function selectChain(next: L1) {
@@ -467,19 +468,19 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
   }
 
   const creditBridgeNote = useCallback(
-    async (note: ReturnType<typeof createBridgeNote>) => {
-      if (!ethToken) return
-      if (USE_MOCK) await sdk.deposit({ asset: ethToken.code, amount })
-      else addNote(note, { assetCode: ethToken.code })
+    async (bridgeResult: ReturnType<typeof createBridgeNote>) => {
+      if (!bridgeResult) return
+      if (USE_MOCK) await sdk.deposit({ asset: bridgeResult.bridgedCode, amount })
+      else addNote(bridgeResult.note, { assetCode: bridgeResult.bridgedCode })
       await refreshBalances()
     },
-    [sdk, ethToken?.code, amount, refreshBalances],
+    [sdk, amount, refreshBalances],
   )
 
   // --- deposit / withdraw flows --------------------------------------------
 
-  /** Stellar → Larel: a native single-tx deposit of the selected token (LIVE). */
-  async function runStellarIn() {
+  /** Flare → Larel: a native single-tx deposit of the selected token (LIVE). */
+  async function runFlareIn() {
     setStep(0)
     const { hash } = await sdk.deposit({
       asset: depositToken.code,
@@ -488,12 +489,12 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
       decimals: depositToken.decimals,
       native: depositToken.native,
     })
-    setStellarHash(hash)
+    setFlareHash(hash)
     setStep(1)
     await refreshBalances()
   }
 
-  /** Ethereum → Larel: lock on L1, wait for the light client, mint on Stellar. */
+  /** Ethereum → Larel: lock on L1, wait for the light client, mint on Flare. */
   async function runEthIn() {
     const amountBase = (() => {
       try {
@@ -505,14 +506,14 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
     if (amountBase <= 0n) throw new Error('Enter a valid amount.')
     if (amountBase >= MAX_U64) throw new Error('Amount too large for a demo note (must fit 2^64).')
 
-    const note = createBridgeNote({ token: ethToken, amountBase, spendingKey: getSpendingKey() })
-    const commitment = commitmentHex(note)
+    const bridgeResult = createBridgeNote({ token: ethToken, amountBase, spendingKey: getSpendingKey() })
+    const commitment = commitmentHex(bridgeResult.note)
 
-    if (USE_MOCK_BRIDGE) {
+    if (EFFECTIVE_MOCK_BRIDGE) {
       await wait(900); setL1Hash(`0x${commitment.slice(2, 18)}…mock`); setStep(1)
       await wait(1300); setStep(2)
       await wait(1300); setStep(3)
-      await wait(1000); await creditBridgeNote(note)
+      await wait(1000); await creditBridgeNote(bridgeResult)
       return
     }
 
@@ -547,11 +548,11 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
     })
     if (!minted) throw new Error('Timed out waiting for the mint on Flare. Is the relayer submitting inclusion proofs?')
     setStep(3)
-    await creditBridgeNote(note)
+    await creditBridgeNote(bridgeResult)
   }
 
-  /** Larel → Stellar: an in-browser ZK withdraw of one note to a classic Stellar account. */
-  async function runStellarOut() {
+  /** Larel → Flare: an in-browser ZK withdraw of one note to a Flare account. */
+  async function runFlareOut() {
     if (!selectedNote) throw new Error('No shielded note to withdraw.')
     setStep(0)
     const { hash } = await sdk.withdraw({
@@ -560,14 +561,14 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
       recipient,
       commitment: selectedNote.commitment,
     })
-    setStellarHash(hash)
+    setFlareHash(hash)
     setStep(1)
     await refreshBalances()
   }
 
   /** Larel → Ethereum: burn the selected note, unlock the L1 backing (preview). */
   async function runEthOut() {
-    if (!USE_MOCK_BRIDGE) {
+    if (!EFFECTIVE_MOCK_BRIDGE) {
       throw new Error(
         'Live bridge-out needs the in-browser withdraw prover. Run with VITE_USE_MOCK_BRIDGE=true to preview the burn → unlock flow.',
       )
@@ -583,14 +584,14 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
   }
 
   async function run() {
-    setError(null); setL1Hash(null); setStellarHash(null); setStatus('running'); setStep(0)
+    setError(null); setL1Hash(null); setFlareHash(null); setStatus('running'); setStep(0)
     cancelledRef.current = false
     try {
       if (direction === 'deposit') {
-        if (l1 === 'stellar') await runStellarIn()
+        if (l1 === 'flare') await runFlareIn()
         else await runEthIn()
       } else {
-        if (l1 === 'stellar') await runStellarOut()
+        if (l1 === 'flare') await runFlareOut()
         else await runEthOut()
       }
       setStatus('done')
@@ -606,13 +607,13 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
   const action: { label: string; onClick: () => void; disabled?: boolean; loading?: boolean } = (() => {
     if (running) return { label: 'Working…', onClick: () => {}, loading: true }
     // Every shielded note is owned by the wallet-derived identity, so a connected
-    // Stellar wallet (and its derived key) is required for both directions.
-    if (!USE_MOCK && stellar.status !== 'connected')
-      return { label: 'Connect wallet', onClick: () => void stellar.connect() }
+    // Flare wallet (and its derived key) is required for both directions.
+    if (!USE_MOCK && flare.status !== 'connected')
+      return { label: 'Connect wallet', onClick: () => void flare.connect() }
     if (!USE_MOCK && !identityReady)
       return { label: 'Preparing shielded identity…', onClick: () => {}, disabled: true }
     if (direction === 'deposit') {
-      if (l1 === 'stellar') {
+      if (l1 === 'flare') {
         if (resolvingCustom) return { label: 'Resolving token…', onClick: () => {}, disabled: true }
         if (!depositToken.sac)
           return { label: `${depositToken.code} not available here`, onClick: () => {}, disabled: true }
@@ -620,23 +621,22 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
         return { label: `Deposit ${depositToken.code}`, onClick: () => void run() }
       }
       // ethereum deposit
-      if (!USE_MOCK_BRIDGE && !BRIDGE_CONFIGURED) return { label: 'Bridge unavailable', onClick: () => {}, disabled: true }
-      if (!USE_MOCK_BRIDGE && !evm.isConnected)
+      if (!EFFECTIVE_MOCK_BRIDGE && !evm.isConnected)
         return { label: evm.hasInjected ? 'Connect MetaMask' : 'No injected wallet', onClick: evm.connect, disabled: !evm.hasInjected }
-      if (!USE_MOCK_BRIDGE && !evm.isSepolia) return { label: 'Switch to Sepolia', onClick: evm.switchToSepolia }
+      if (!EFFECTIVE_MOCK_BRIDGE && !evm.isSepolia) return { label: 'Switch to Sepolia', onClick: evm.switchToSepolia }
       if (!amountValid) return { label: 'Enter an amount', onClick: () => {}, disabled: true }
       return { label: 'Deposit', onClick: () => void run() }
     }
     // withdraw
     if (!selectedNote) return { label: 'No shielded note to withdraw', onClick: () => {}, disabled: true }
-    const okRecipient = l1 === 'stellar' ? isValidStellarAddress(recipient) : isEvmAddress(recipient)
+    const okRecipient = l1 === 'flare' ? isValidFlareAddress(recipient) : isEvmAddress(recipient)
     if (!okRecipient) return { label: 'Enter recipient address', onClick: () => {}, disabled: true }
     return { label: 'Withdraw', onClick: () => void run() }
   })()
 
   // Origin-wallet affordance shown inline in the From panel (EVM origin only).
   const evmWalletChip =
-    direction === 'deposit' && l1 === 'ethereum' && !USE_MOCK_BRIDGE && evm.isConnected && evm.address ? (
+    direction === 'deposit' && l1 === 'ethereum' && !EFFECTIVE_MOCK_BRIDGE && evm.isConnected && evm.address ? (
       <button
         type="button"
         onClick={evm.disconnect}
@@ -660,27 +660,27 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
       <ChainSelect value={l1} onChange={selectChain} disabled={running} />
     )
 
-  // Stellar withdraw is live (real in-browser ZK proof). Only the Ethereum bridge-out
+  // Flare withdraw is live (real in-browser ZK proof). Only the Ethereum bridge-out
   // still needs the mock (its L1 unlock isn't wired yet).
-  const withdrawGated = direction === 'withdraw' && l1 === 'ethereum' && !USE_MOCK_BRIDGE
+  const withdrawGated = direction === 'withdraw' && l1 === 'ethereum' && !EFFECTIVE_MOCK_BRIDGE
 
   const showTracker = status !== 'idle'
 
   function stepDetail(i: number): ReactNode {
     if (direction === 'deposit' && l1 === 'ethereum' && i === 0 && l1Hash) {
-      return USE_MOCK_BRIDGE ? (
+      return EFFECTIVE_MOCK_BRIDGE ? (
         <span className="font-mono">{l1Hash}</span>
       ) : (
         <TxLink href={sepoliaTxUrl(l1Hash)} label={truncateKey(l1Hash, 8, 6)} />
       )
     }
-    if (direction === 'deposit' && l1 === 'ethereum' && i === 3 && status === 'done' && LAREL_BRIDGE_ID && !USE_MOCK_BRIDGE) {
-      return <TxLink href={stellarContractUrl(LAREL_BRIDGE_ID)} label="LarelBridge" />
+    if (direction === 'deposit' && l1 === 'ethereum' && i === 3 && status === 'done' && LAREL_BRIDGE_ID && !EFFECTIVE_MOCK_BRIDGE) {
+      return <TxLink href={flareContractUrl(LAREL_BRIDGE_ID)} label="LarelBridge" />
     }
-    if (l1 === 'stellar' && stellarHash && !USE_MOCK) {
+    if (l1 === 'flare' && flareHash && !USE_MOCK) {
       const last = steps.length - 1
       if ((direction === 'deposit' && i === 0) || (direction === 'withdraw' && i === last)) {
-        return <TxLink href={stellarTxUrl(stellarHash)} label={truncateKey(stellarHash, 8, 6)} />
+        return <TxLink href={flareTxUrl(flareHash)} label={truncateKey(flareHash, 8, 6)} />
       }
     }
     return undefined
@@ -709,7 +709,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
                   onChange={(e) => setAmount(e.target.value)}
                   disabled={running}
                 />
-                {l1 === 'stellar' ? (
+                {l1 === 'flare' ? (
                   <div className="inline-flex shrink-0 items-center gap-2 rounded-none border border-ink-700 bg-ink-850 px-2.5 py-2">
                     <CoinBadge name={customMode ? depositToken.icon : depositCode} size="sm" />
                     <select
@@ -750,15 +750,16 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
                       onChange={(e) => setEthOriginCode(e.target.value)}
                       disabled={running}
                     >
-                      <option value="ETH" className="bg-ink-850">ETH</option>
-                      <option value="USDC" className="bg-ink-850">USDC</option>
+                      {ETH_BRIDGE_OPTIONS.map((code) => (
+                        <option key={code} value={code} className="bg-ink-850">{code}</option>
+                      ))}
                     </select>
                   </div>
                 ) : (
                   <TokenChip code={String(fromCode)} />
                 )}
               </div>
-              {direction === 'deposit' && l1 === 'stellar' && customMode && (
+              {direction === 'deposit' && l1 === 'flare' && customMode && (
                 <div className="mt-2 space-y-1">
                   <TextInput
                     mono
@@ -776,7 +777,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
                   )}
                 </div>
               )}
-              {direction === 'deposit' && l1 === 'stellar' && !customMode && depositToken.faucet && (
+              {direction === 'deposit' && l1 === 'flare' && !customMode && depositToken.faucet && (
                 <p className="mt-2 text-xs text-zinc-500">
                   Need test {depositToken.code}? Mint some from the{' '}
                   <a href="/faucet" className="text-spectral-soft hover:underline">
@@ -847,7 +848,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
             <TextInput
               mono
               className="mt-3"
-              placeholder={l1 === 'stellar' ? 'Flare recipient · 0x…' : 'Ethereum recipient · 0x…'}
+              placeholder={l1 === 'flare' ? 'Flare recipient · 0x…' : 'Ethereum recipient · 0x…'}
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
               disabled={running}
@@ -856,7 +857,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
         </EndpointPanel>
 
         {/* Config warning (Ethereum deposit, live but unconfigured) */}
-        {direction === 'deposit' && l1 === 'ethereum' && !USE_MOCK_BRIDGE && !BRIDGE_CONFIGURED && (
+        {direction === 'deposit' && l1 === 'ethereum' && !EFFECTIVE_MOCK_BRIDGE && !BRIDGE_CONFIGURED && (
           <p className="mt-4 rounded-none border border-zinc-500/20 bg-zinc-500/10 px-3.5 py-2.5 text-xs text-zinc-300">
             Live bridge addresses are not configured. Set the <span className="font-mono">VITE_*</span> bridge vars, or run with{' '}
             <span className="font-mono">VITE_USE_MOCK_BRIDGE=true</span>.
@@ -912,7 +913,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
                   </Link>
                   .
                 </>
-              ) : l1 === 'stellar' ? (
+              ) : l1 === 'flare' ? (
                 <>Released to {truncateKey(recipient, 6, 6)} on Flare.</>
               ) : (
                 <>Released to {truncateKey(recipient, 6, 6)} on Sepolia.</>
