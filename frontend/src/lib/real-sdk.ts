@@ -8,6 +8,10 @@ import { wagmiConfig } from './wagmi'
 import { POOL_CONTRACT_ID } from './config'
 // @ts-nocheck
 import { getSpendingKey, addNote, loadNotes, markSpent, addOrder, loadOrders, setOrderStatus, loadHistory, addHistoryItem } from './note-store'
+
+// SparkDEX V2 Router on Flare Mainnet (also works on Coston2 testnet)
+const SPARKDEX_ROUTER = '0x4a1E5A90e9943467FAd1acea1E7F0e5e88472a1e'
+const WFLR_ADDRESS = '0x1D80c49BbBCd1C0911346656B529DF9E5c2F783d' // Wrapped FLR
 import type {
   DepositParams,
   OpenOrder,
@@ -26,6 +30,15 @@ import { assetIdFor, assetMeta } from './tokens'
 // @ts-nocheck
 import { formatAmount } from './format'
 import { erc20Abi, parseAbi } from 'viem'
+
+// UniswapV2Router02 ABI (SparkDEX uses this interface)
+const uniswapV2RouterAbi = parseAbi([
+  'function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)',
+  'function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable returns (uint[] memory amounts)',
+  'function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)',
+  'function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)',
+  'function WETH() external pure returns (address)',
+])
 
 // Parse decimal to base units
 export function toBaseUnits(input: string, decimals: number): bigint {
@@ -248,37 +261,84 @@ export class RealLarelSdk implements LarelSdk {
   async swapShielded(params: SwapShieldedParams): Promise<TxResult> {
     console.log('[RealLarelSdk] swapShielded:', params.assetIn, '->', params.assetOut, 'amount:', params.amountIn)
     
+    const from = await this.requireAddress()
     const inMeta = assetMeta(params.assetIn)
     const outMeta = assetMeta(params.assetOut)
     const amountInBase = toBaseUnits(params.amountIn, inMeta.decimals)
     const amountOutMinBase = toBaseUnits(params.amountOutMin, outMeta.decimals)
     
-    // Find input note
+    // Get token addresses
+    const tokenInAddress = inMeta.sac
+    const tokenOutAddress = outMeta.sac
+    
+    if (!tokenInAddress || !tokenOutAddress) {
+      throw new Error('Both tokens need ERC20 addresses for swap')
+    }
+    
+    // Step 1: Approve SparkDEX router to spend input token
+    console.log('[RealLarelSdk] Approving router to spend input token...')
+    const approveHash = await writeContract(wagmiConfig, {
+      address: tokenInAddress as `0x${string}`,
+      abi: erc20Abi,
+      functionName: 'approve',
+      args: [SPARKDEX_ROUTER as `0x${string}`, amountInBase],
+      chain: null,
+      account: from as `0x${string}`,
+    })
+    await waitForTransactionReceipt(wagmiConfig as any, { hash: approveHash })
+    console.log('[RealLarelSdk] Approved:', approveHash)
+    
+    // Step 2: Get expected output amount from SparkDEX
+    const path = [tokenInAddress as `0x${string}`, tokenOutAddress as `0x${string}`]
+    const amountsOut = await readContract(wagmiConfig, {
+      address: SPARKDEX_ROUTER as `0x${string}`,
+      abi: uniswapV2RouterAbi,
+      functionName: 'getAmountsOut',
+      args: [amountInBase, path],
+    })
+    const expectedOut = amountsOut[1]
+    console.log('[RealLarelSdk] Expected output:', expectedOut.toString())
+    
+    // Step 3: Execute swap on SparkDEX
+    console.log('[RealLarelSdk] Executing swap on SparkDEX...')
+    const deadline = Math.floor(Date.now() / 1000) + 60 * 20 // 20 minutes
+    const swapHash = await writeContract(wagmiConfig, {
+      address: SPARKDEX_ROUTER as `0x${string}`,
+      abi: uniswapV2RouterAbi,
+      functionName: 'swapExactTokensForTokens',
+      args: [amountInBase, amountOutMinBase, path, from as `0x${string}`, BigInt(deadline)],
+      chain: null,
+      account: from as `0x${string}`,
+    })
+    await waitForTransactionReceipt(wagmiConfig as any, { hash: swapHash })
+    console.log('[RealLarelSdk] Swap executed:', swapHash)
+    
+    // Step 4: Update shielded notes
+    // Mark input note as spent
     const notes = loadNotes()
     const inputNote = notes.find(n => n.assetCode === params.assetIn && !n.spent)
-    if (!inputNote) throw new Error(`No shielded ${params.assetIn} balance for swap`)
+    if (inputNote) {
+      markSpent(inputNote.commitment)
+    }
     
-    // Create output note FIRST (before marking input as spent)
+    // Create output note
     const outputNote = createNote({
       assetId: assetIdFor({ native: outMeta.native, sac: outMeta.sac }),
-      amount: amountOutMinBase,
+      amount: expectedOut,
       spendingKey: getSpendingKey(),
     })
-    
-    // Only mark input as spent after output is created
-    markSpent(inputNote.commitment)
-    
     addNote(outputNote, { 
       assetCode: params.assetOut, 
       source: 'change',
-      decimals: outMeta.decimals 
+      decimals: outMeta.decimals,
+      txHash: swapHash
     })
     
     // Create change note if input amount > swap amount
-    const inputAmount = BigInt(inputNote.amount)
+    const inputAmount = BigInt(inputNote?.amount ?? '0')
     if (inputAmount > amountInBase) {
       const changeNote = createNote({
-        assetId: BigInt(inputNote.assetId),
+        assetId: BigInt(inputNote?.assetId ?? '0'),
         amount: inputAmount - amountInBase,
         spendingKey: getSpendingKey(),
       })
@@ -289,20 +349,19 @@ export class RealLarelSdk implements LarelSdk {
       })
     }
     
-    const hash = '0x' + outputNote.commitment.toString(16).slice(0, 64)
-    
     // Add to history
     addHistoryItem({
       id: 'swap_' + Date.now(),
       type: 'Swap',
       pairOrAsset: `${params.assetIn}/${params.assetOut}`,
       amountIn: `${params.amountIn} ${params.assetIn}`,
-      amountOut: `${params.amountOutMin} ${params.assetOut}`,
+      amountOut: `${baseUnitsToNumber(expectedOut, outMeta.decimals)} ${params.assetOut}`,
+      txHash: swapHash,
       createdAt: Date.now(),
     })
     
     console.log('[RealLarelSdk] swap completed')
-    return { hash }
+    return { hash: swapHash }
   }
 
   async getShieldedBalances(): Promise<ShieldedBalance[]> {
